@@ -39,7 +39,7 @@ once that's done, delete `ota_package.tar` from the drive (or use a different dr
 
 ### 2. put the Launchpad installer on the drive
 
-download **`Launchpad-install-usb.zip`** from the [latest release](../../releases/latest).
+download **`Launchpad-install-usb.zip`** from the [releases page](../../releases) (the newest one is at the top).
 
 extract it so its **contents** sit at the **root** of the drive, with nothing else from NEMESIS left on it. the drive should look exactly like this:
 
