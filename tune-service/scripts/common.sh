@@ -21,6 +21,9 @@ APP_PACKAGE=com.paytondev.launchpad
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') launchpad $*"; }
 
+# KitKat toolbox cmp has no -s option. Preserve its exit status and silence I/O.
+files_equal() { cmp "$1" "$2" >/dev/null 2>&1; }
+
 android_up() { [ "$(getprop sys.boot_completed)" = 1 ]; }
 
 # Size in bytes of a file, from toolbox `ls -l` (perms owner group size date time name).

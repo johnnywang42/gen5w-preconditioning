@@ -1,6 +1,6 @@
 # V1 compatibility and verification
 
-The current preconditioning profile targets `wp_daudioplus_neev23_us` on
+The original Ioniq 5 preconditioning profile targets `wp_daudioplus_neev23_us` on
 Android 4.4/API 19. It validates these firmware files before enabling Start:
 
 | File | SHA-256 |
@@ -13,6 +13,53 @@ It checks HEV service `com.hkmc.micom.hev` / descriptor
 `com.hkmc.bcm.IBCMService`. An incompatible or unreadable interface leaves the
 feature unavailable. Do not remove these checks to support another firmware;
 establish its command and feedback profile first.
+
+## EV6 US 260507 profile
+
+The additional profile requires Android API 19, device `wp_daudioplus_cvev_us`,
+and `ro.build.product=CVEV.USA.0000.V015.012.260507`, plus both fingerprints:
+
+| File | SHA-256 |
+| --- | --- |
+| `/system/framework/automotive.odex` | `b9e7e02b81e1a8cfcf767c6b8bbb28bcf1d2c411a208fbf6a465e7f0c662774a` |
+| `/system/framework/automotive-service.odex` | `8af745b41aa28f490953d61531215cd94e059f104b31f6236a8f6c7af23b8062` |
+
+The property is read directly: Android `Build.PRODUCT` exposes a different
+property. The original Ioniq 5 checks remain unchanged. Neither profile accepts
+the other profile's hashes. The HEV/BCM descriptors are checked for both.
+
+Field testing on October 24-25, 2026 used a US 2023 Kia EV6 Wind RWD, Gen5W
+software `CV_E.USA.S5W_M.V015.012.260507`, with NEMESIS 1.15:
+
+- Supervised Start/Stop scripts and the installed app observed Off -> Active ->
+  Off using the existing command arguments and feedback mapping below.
+- The owner confirmed app Start/Stop and Ready after an infotainment restart
+  following Stop. A subsequent cool-battery morning test also activated.
+- Holding TUNE opened Launchpad after reboot. Recorded input was key 17 on
+  `daudio_wp_daudioplus_cvev_us`; the original 800 ms hold and passive event
+  handling are retained. Holding TUNE opens the screen; it does not issue Start.
+- The first installer attempt failed because this head unit's toolbox `cmp`
+  rejects `-s`. Quiet byte comparisons now redirect output instead, including
+  staging, installation, rollback, and USB completion checks.
+
+These observations came from local builds carrying these changes, not from a
+published upstream release. Later local builds also contain temperature display
+and timeout improvements; those features are outside this contribution. The
+extracted source combination has host build/test coverage but has not itself
+been installed as a new vehicle build.
+
+No EV6 command/enum remapping was needed. Start/Stop sequencing, the controller
+lifecycle, package IDs, release version, and original Ioniq TUNE default remain
+unchanged. No raw vehicle logs, firmware, disassembly, APKs, or signing material
+are included. This is evidence for the listed profile, not blanket EV6 support.
+
+Tests used no active Kia navigation route. Driving activation, interaction with
+native navigation, other trims/regions/software, active-session process/power
+loss, and a public fresh-install/update/uninstall cycle remain unverified.
+Closing the app is not Stop. Do not update or uninstall during an active or
+pending request; stop it and confirm Off first. Public APKs should be built and
+signed through the maintainer's release process. Local test keys differ from the
+upstream key and do not establish cross-signed update compatibility.
 
 ## Command profile
 
@@ -50,5 +97,5 @@ The source includes unit tests for the request/feedback distinction, cancellatio
 communication failures, recovery, navigation between app pages, favorites,
 connection formatting, and TUNE event parsing/hold detection. Emulator tests
 and static profile derivation do not establish real battery heating. At source
-publication, actual parked-car activation and cancellation have not yet been
-verified in this workspace.
+publication, the original Ioniq 5 profile had not been verified in a parked car
+in this workspace. The later EV6 field observations are scoped separately above.

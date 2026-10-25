@@ -13,7 +13,7 @@ fail() {
 
 [ -f "$DEX" ] || fail "missing $DEX"
 
-if [ -f "$SYSAPK" ] && cmp -s "$DEX" "$SYSAPK"; then
+if [ -f "$SYSAPK" ] && files_equal "$DEX" "$SYSAPK"; then
     log "postinstall: $SYSAPK already current; /system not touched"
     exit 0
 fi
@@ -21,11 +21,11 @@ fi
 # Prepare and verify everything in tmp first.
 rm -rf "$WORK"
 mkdir -p "$WORK" || fail "cannot create $WORK"
-cat "$DEX" > "$WORK/Launchpad.apk" && cmp -s "$DEX" "$WORK/Launchpad.apk" \
+cat "$DEX" > "$WORK/Launchpad.apk" && files_equal "$DEX" "$WORK/Launchpad.apk" \
     || fail "cannot stage APK in $WORK"
 HAD_PREVIOUS=0
 if [ -f "$SYSAPK" ]; then
-    cat "$SYSAPK" > "$WORK/Launchpad-previous.apk" && cmp -s "$SYSAPK" "$WORK/Launchpad-previous.apk" \
+    cat "$SYSAPK" > "$WORK/Launchpad-previous.apk" && files_equal "$SYSAPK" "$WORK/Launchpad-previous.apk" \
         || fail "cannot back up current $SYSAPK to $WORK"
     HAD_PREVIOUS=1
 fi
@@ -47,7 +47,7 @@ fi
 stop_app
 system_rw || fail "nemesis remount rw failed; nothing changed"
 if cat "$WORK/Launchpad.apk" > "$SYSAPK" && chown 0:0 "$SYSAPK" && chmod 0644 "$SYSAPK" \
-    && sync && cmp -s "$WORK/Launchpad.apk" "$SYSAPK"; then
+    && sync && files_equal "$WORK/Launchpad.apk" "$SYSAPK"; then
     system_restore
     rm -rf "$WORK"
     log "postinstall: installed $SYSAPK ($NEW_SIZE bytes)"
@@ -57,7 +57,7 @@ fi
 log "postinstall: write to $SYSAPK failed or did not verify; rolling back"
 if [ "$HAD_PREVIOUS" = 1 ]; then
     if cat "$WORK/Launchpad-previous.apk" > "$SYSAPK" && chown 0:0 "$SYSAPK" && chmod 0644 "$SYSAPK" \
-        && sync && cmp -s "$WORK/Launchpad-previous.apk" "$SYSAPK"; then
+        && sync && files_equal "$WORK/Launchpad-previous.apk" "$SYSAPK"; then
         log "postinstall: previous $SYSAPK restored"
     else
         # Keep the backup for manual recovery; it survives until reboot.
