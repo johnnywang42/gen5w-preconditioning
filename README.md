@@ -54,6 +54,7 @@ extract it so its **contents** sit at the **root** of the drive, with nothing el
 
 ```text
 USB drive/
+├── README.txt
 ├── NEMESIS.data
 ├── launchpad/
 │   ├── common.sh
@@ -114,7 +115,7 @@ press **Stop** to cancel, including while it's still waiting. closing Launchpad 
 
 same as installing, but with **`Launchpad-update-usb.zip`** from the newest release (helper: `write-usb.sh update ...`). the log is `launchpad-update.log`. reboot afterwards.
 
-your favorites and settings are kept. the update replaces the app in place instead of removing it first. it also works if you installed an older version with the old manual (ADB) instructions, or if nothing is installed yet.
+with a compatible signing certificate, your favorites and settings are kept. the update replaces the app in place instead of removing it first. a developer-signed or independently built APK needs a signing-migration plan before using the maintainer's updater; do not clear app data to force it. an older manual (ADB) installation also needs a compatible certificate. the update script can install if nothing is installed yet.
 
 > [!NOTE]
 > if you plug in the **install** drive when Launchpad is already installed, it stops and tells you to use the update drive. running a drive twice is harmless.

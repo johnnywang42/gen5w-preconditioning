@@ -49,13 +49,15 @@ Launchpad after installation. These are separate shortcuts.
 2. Download **`Launchpad-install-usb.zip`** for a first installation. If Launchpad
    is already installed, read **Updating** below first.
 3. Use an empty drive, or back up its contents to your computer. Move any old
-   `NEMESIS.data`, `NEMESIS.sh`, and `ota_package.tar` off the drive.
+   `NEMESIS.data`, `NEMESIS.sh`, `ota_package.tar`, `README.txt`, `launchpad`, and
+   `packages` items off the drive before copying a new bundle.
 4. Extract the ZIP. Copy the **contents** of its folder onto the drive, rather
    than copying the folder itself. Do not extract the inner package ZIP.
 5. Check that you can see this layout immediately when you open the drive:
 
 ```text
 USB drive/
+  README.txt
   NEMESIS.data
   launchpad/
     common.sh
@@ -120,8 +122,14 @@ cancellation after five minutes without confirmed activation, as explained below
   reading was obtained. **Stale** means the last reading is old or a refresh
   failed; do not treat it as current. Advanced retains the old value and its age.
 
-Temperature readings stop when you leave Launchpad and resume when you reopen
-it. Reading the temperature does not turn heating on. The incoming value uses
+Temperature polling is intended to stop when you leave Launchpad and resume
+when you reopen it. A known issue can leave the reading stale after returning
+during an active session. If this happens, leave and reopen Launchpad again;
+this restored updates in the reported test after conditioning ended. It does
+not confirm the current temperature or stop an active request. Use **Stop**
+when you want to cancel conditioning.
+
+Reading the temperature does not turn heating on. The incoming value uses
 whole degrees Celsius, so Fahrenheit readings can move in steps. The response
 age tells you when the app received data, not exactly when the car sampled it.
 
@@ -145,6 +153,10 @@ After five minutes without an **Active** response, the app sends cancellation
 and waits for a fresh **Off** response before restoring Start. It then shows
 **No activation**. An already-active session is not stopped by this five-minute
 timer. A timeout does not prove the battery was warm.
+
+This timeout has automated test coverage but has not yet been observed in the
+car. The reported stop near 70°F occurred after Active and may have been a
+temperature-based stop; it does not establish a fixed cutoff or verify the timeout.
 
 If cancellation fails, the app keeps the session unresolved and leaves **Stop**
 available to retry. If cancellation was sent but Off has not been confirmed,
