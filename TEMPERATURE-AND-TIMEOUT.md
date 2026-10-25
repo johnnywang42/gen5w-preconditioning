@@ -107,6 +107,14 @@ using the local development build:
 - The owner also confirmed that temperature display refresh resumes after
   leaving and reopening Launchpad. This verifies the observed reopen behavior,
   not independently that native polling ceased while the app was hidden.
+- In a later October 25 test, the owner reported a displayed 68°F, tapped Start,
+  saw Battery warm, chose Start anyway, and observed conditioning begin. It
+  appeared to stop when the displayed temperature reached 70°F. This verifies
+  the observed notice and explicit manual-request path. No logs or exact Off
+  transition were supplied for the apparent stop. It does not establish 70°F
+  as a fixed BMS cutoff; it also shows that the 68°F advisory is not a hard
+  activation boundary on this vehicle. The unattended ten-second reset was
+  not exercised in this run because Start anyway was selected.
 
 Host tests cover the warm notice, override, unknown-temperature fallback,
 eligibility loss, timeout boundaries, cancellation failure, retained ownership,
@@ -114,8 +122,8 @@ stale/equal-value display samples, and native registration/request/removal. Host
 Binder fixtures also cover a hung call and overlapping readers. They do not
 execute the Android service/activity lifecycle on a vehicle.
 
-Before a public binary release, still verify the warm notice/ten-second reset
-and explicit override in-car, pending-timeout cancellation/Off/reset in-car,
+Before a public binary release, still verify the unattended ten-second notice
+reset in-car, pending-timeout cancellation/Off/reset in-car,
 failed-read recovery and the chosen public installation,
 update, removal, and signing-migration path. Active-session process/power-loss
 behavior, native-navigation coexistence, and driving activation remain unverified.
