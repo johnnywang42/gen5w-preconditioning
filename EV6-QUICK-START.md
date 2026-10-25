@@ -10,6 +10,13 @@ does not provide a new signed installer.
 Tested vehicle: **US 2023 Kia EV6 Wind RWD**, with **Standard-class Gen5W
 Navigation** and software **`CV_E.USA.S5W_M.V015.012.260507`**.
 
+**Other model years:** US-market 2022–2024 EV6 vehicles with the same Gen5W
+hardware and exact supported firmware may also be compatible, but have not
+been tested beyond the vehicle above. The app checks device identity, software
+version, and both firmware fingerprints before allowing preconditioning.
+Reports from owners of matching 2022 and 2024 vehicles are welcome. Model year
+alone does not establish compatibility.
+
 Open **Setup -> General -> Software information/Update** to check your software
 version. Match the **Software Version** line, not the separate Firmware Version
 or map version. A different model year, market, or software version has not been

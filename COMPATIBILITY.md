@@ -16,6 +16,13 @@ establish its command and feedback profile first.
 
 ## EV6 US 260507 profile
 
+**Other model years:** US-market 2022–2024 EV6 vehicles with the same Gen5W
+hardware and exact supported firmware may also be compatible, but have not
+been tested beyond the verified **US 2023 EV6 Wind RWD**. The app checks device
+identity, software version, and both firmware fingerprints before allowing
+preconditioning. Reports from owners of matching 2022 and 2024 vehicles are
+welcome. Model year alone does not establish compatibility.
+
 The additional profile requires Android API 19, device `wp_daudioplus_cvev_us`,
 and `ro.build.product=CVEV.USA.0000.V015.012.260507`, plus both fingerprints:
 
