@@ -277,7 +277,7 @@ see [BUILDING.md](BUILDING.md). releases are built with `tools/build_apk.sh` and
 
 ## credits
 
-- EV6 compatibility contribution and vehicle testing: [Abro86](https://github.com/Abro86), with development and host-test assistance from OpenAI Codex.
+- EV6 development, documentation, and vehicle testing: [Abro86](https://github.com/Abro86), with development, documentation, and host-test assistance from OpenAI Codex.
 - [https://github.com/xwtk/hmg_nemesis](https://github.com/xwtk/hmg_nemesis) - the NEMESIS exploit that made this all possible
 - [https://github.com/tylerharvey/Ioniq5_CAN](https://github.com/tylerharvey/Ioniq5_CAN) - reverse engineered the CAN messages used to start preconditioning
 - [https://github.com/Helloyunho/gen5w-utils](https://github.com/Helloyunho/gen5w-utils) - other scripts and tools for reverse engineering Gen5W

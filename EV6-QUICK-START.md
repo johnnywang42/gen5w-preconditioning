@@ -140,6 +140,6 @@ release name, steps taken, and the relevant error. Review logs before posting
 them publicly; redact personal identifiers, locations, and device information
 unrelated to the fault. Do not upload complete vehicle firmware dumps.
 
-Development and host testing were assisted by **OpenAI Codex**. **Abro86**
-contributed the EV6 work and performed the vehicle tests. Launchpad remains the
-original work of **paytondevs** and its contributors.
+EV6 development, documentation, and vehicle testing: **Abro86**, with development,
+documentation, and host-test assistance from **OpenAI Codex**. Launchpad remains
+the original work of **paytondevs** and its contributors.
