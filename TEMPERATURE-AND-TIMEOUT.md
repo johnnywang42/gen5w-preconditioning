@@ -104,6 +104,9 @@ using the local development build:
 - On October 25, 2026, the owner confirmed the new labels, successful responses
   about every ten seconds in Advanced, and a temperature increase after a little
   over five minutes of conditioning. Exact before/after numbers were not supplied.
+- The owner also confirmed that temperature display refresh resumes after
+  leaving and reopening Launchpad. This verifies the observed reopen behavior,
+  not independently that native polling ceased while the app was hidden.
 
 Host tests cover the warm notice, override, unknown-temperature fallback,
 eligibility loss, timeout boundaries, cancellation failure, retained ownership,
@@ -113,7 +116,7 @@ execute the Android service/activity lifecycle on a vehicle.
 
 Before a public binary release, still verify the warm notice/ten-second reset
 and explicit override in-car, pending-timeout cancellation/Off/reset in-car,
-display pause/resume and failed-read recovery, and the chosen public installation,
+failed-read recovery and the chosen public installation,
 update, removal, and signing-migration path. Active-session process/power-loss
 behavior, native-navigation coexistence, and driving activation remain unverified.
 These limits do not negate the owner's successful manual conditioning/display
