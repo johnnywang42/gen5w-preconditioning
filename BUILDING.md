@@ -21,11 +21,17 @@ the first build also downloads Android build dependencies.
 ```sh
 ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleDebug :app:assembleRelease
 python3 tools/test_ev6_scripts.py
+python3 tools/test_temperature_binder.py
 ```
 
 Debug uses Android's local debug signing key. On a ranchu/goldfish emulator, the
 debug vehicle client simulates a pending request; it never reports heating from
 a timer. Release uses the OEM client and rejects incompatible firmware.
+
+The temperature contract test uses `JAVA_HOME` or `java`/`javac` on PATH, compiles
+the real reader against small host Binder fixtures, and writes results under
+`build/temperature-contract/`. It never contacts a car. It does not substitute
+for Android service lifecycle or in-car verification.
 
 The unsigned release is at
 `app/build/outputs/apk/release/app-release-unsigned.apk`. Do not install it as a

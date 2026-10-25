@@ -18,6 +18,11 @@ The EV6 changes are source contributions pending a maintainer release. Existing 
 
 **EV6 owners:** start with the [EV6 installation and everyday-use guide](EV6-QUICK-START.md).
 
+This follow-up contribution adds a battery-temperature display and warm-battery
+advisory for the exact EV6 profile, plus a five-minute unconfirmed-request timeout
+for both supported profiles. See [behavior and validation](TEMPERATURE-AND-TIMEOUT.md).
+These source changes are pending review and are not a new downloadable release.
+
 **what you'll need:**
 - a computer (Mac, Windows or Linux)
 - a USB drive formatted **FAT32 or exFAT**. a small, empty one is easiest.
@@ -98,10 +103,10 @@ you only need the USB drive again to update or uninstall.
 ## using it
 
 1. hold TUNE to open Launchpad and go to preconditioning.
-2. press **Start**. Launchpad shows **Waiting for BMS** at first. activation usually takes **60–120 seconds**. that's a limitation of the car, nothing i can do about that unfortunately.
+2. press **Start**. On the supported EV6, a warm reading may show a ten-second advisory with **Start anyway**. Otherwise Launchpad shows **Request sent** until the car confirms activation. A request without confirmed activation is cancelled after five minutes; Start returns only after the car reports Off.
 3. the battery management system can still say no, because of temperature, charge, or other conditions it controls.
 
-**waiting does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active.
+**a request does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active. The five-minute pending timeout does not cut short an active session. Temperature display and the warm advisory are EV6-only; the shared timeout also applies to the Ioniq 5 profile.
 
 press **Stop** to cancel, including while it's still waiting. closing Launchpad does **not** stop a request that's already running.
 
@@ -132,7 +137,7 @@ this removes Launchpad and its TUNE-hold service. it also works if you installed
 | "not enough space on /system" in the log | nothing was changed. message me with the log. |
 | holding TUNE doesn't open Launchpad | reboot once more. in NEMESIS Manager → **Services**, `paytondev.launchpad/knobd` should be running. a different headunit may need a different TUNE profile; message me. |
 | preconditioning says **Unavailable** | your firmware doesn't match the checked profile, so Launchpad won't send commands. see [COMPATIBILITY.md](COMPATIBILITY.md). |
-| it says **Waiting for BMS** forever | the car hasn't accepted the request. it can refuse because of temperature, charge, or other conditions. press **Stop** and try again later. |
+| it stays **Request sent** | activation is unconfirmed. press **Stop**, or allow the five-minute pending timeout to request cancellation. The app waits for Off before offering Start again. |
 
 ## what this changes on your car
 

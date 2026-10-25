@@ -61,9 +61,11 @@ public final class MainActivity extends Activity {
     private View statusDot, copyButton;
     private TextView preconditionStatus, preconditionDetail, preconditionIndicator, preconditionElapsed, preconditionButton;
     private TextView preconditionFailure;
+    private TextView preconditionTemperature;
     private ScrollView advancedScroll;
     private PreconditioningService.LocalBinder vehicleService;
     private PreconditioningSnapshot preconditioning = PreconditioningSnapshot.checking();
+    private BatteryTemperatureReading batteryTemperature = BatteryTemperatureReading.checking();
     private boolean vehicleBound;
     private ConnectionSnapshot connection = ConnectionSnapshot.unknown();
     private ScreenFlow.Page page = ScreenFlow.Page.HOME;
@@ -102,13 +104,17 @@ public final class MainActivity extends Activity {
         }
         @Override public void onServiceDisconnected(ComponentName name) {
             vehicleService = null; preconditioning = PreconditioningSnapshot.checking();
+            batteryTemperature = BatteryTemperatureReading.checking().update(null, SystemClock.elapsedRealtime());
             updatePreconditioningViews();
         }
     };
     private final Runnable preconditioningTick = new Runnable() {
         @Override public void run() {
             if (!resumed) return;
-            if (vehicleService != null) preconditioning = vehicleService.snapshot();
+            if (vehicleService != null) {
+                preconditioning = vehicleService.snapshot();
+                batteryTemperature = vehicleService.temperature();
+            }
             updatePreconditioningViews(); main.postDelayed(this, 1000);
         }
     };
@@ -182,6 +188,7 @@ public final class MainActivity extends Activity {
         advancedScroll = null;
         preconditionStatus = null; preconditionDetail = null; preconditionButton = null;
         preconditionIndicator = null; preconditionElapsed = null; preconditionFailure = null;
+        preconditionTemperature = null;
         content.removeAllViews(); toolbar.removeAllViews();
         LinearLayout.LayoutParams contentParams = (LinearLayout.LayoutParams) content.getLayoutParams();
         contentParams.topMargin = ui.dp(page == ScreenFlow.Page.ADVANCED ? 28 : 16);
@@ -268,6 +275,10 @@ public final class MainActivity extends Activity {
         // Give the action its own focus target, independent of the read-only labels.
         precondition.removeViewAt(precondition.getChildCount() - 1);
         preconditionStatus = (TextView) precondition.findViewWithTag("subtitle");
+        preconditionTemperature = ui.text("Battery temp: checking…", 14, FocusUi.MUTED, false);
+        preconditionTemperature.setSingleLine(true);
+        preconditionTemperature.setEllipsize(TextUtils.TruncateAt.END);
+        ((LinearLayout) preconditionStatus.getParent()).addView(preconditionTemperature);
         preconditionButton = preconditioningButton();
         precondition.addView(preconditionButton, new LinearLayout.LayoutParams(ui.dp(82), ui.dp(44)));
         actions.addView(precondition, new LinearLayout.LayoutParams(-1, 0, 1));
@@ -331,6 +342,8 @@ public final class MainActivity extends Activity {
         preconditionElapsed = ui.text("Elapsed: —", 15, FocusUi.MUTED, false);
         preconditionFailure = ui.text("Failure reason: Unknown", 15, FocusUi.MUTED, false);
         details.addView(preconditionStatus); details.addView(preconditionDetail);
+        preconditionTemperature = ui.text("Lowest Battery Pack Temperature: checking…", 16, FocusUi.MUTED, false);
+        details.addView(preconditionTemperature);
         LinearLayout facts = ui.row();
         facts.addView(preconditionIndicator, new LinearLayout.LayoutParams(0, -2, 1));
         facts.addView(preconditionElapsed, new LinearLayout.LayoutParams(0, -2, 1));
@@ -372,7 +385,9 @@ public final class MainActivity extends Activity {
         ui.background(button, ui.control(FocusUi.BLUE, 22));
         addTarget(button, new Runnable() { @Override public void run() {
             if (preconditioning.canStop || preconditioning.canStart) {
-                String action = preconditioning.canStop ? PreconditioningService.STOP : PreconditioningService.START;
+                String action = preconditioning.canStop ? PreconditioningService.STOP
+                    : preconditioning.state == PreconditioningSnapshot.State.WARM
+                        ? PreconditioningService.START_ANYWAY : PreconditioningService.START;
                 startService(new Intent(MainActivity.this, PreconditioningService.class).setAction(action));
                 // Serialize presses until the service publishes the result.
                 if (preconditionButton != null) preconditionButton.setEnabled(false);
@@ -385,15 +400,20 @@ public final class MainActivity extends Activity {
         String status = preconditioning.title();
         if (page == ScreenFlow.Page.HOME && preconditioning.requested) status += " · " + preconditioning.elapsed();
         preconditionStatus.setText(status);
+        if (preconditionTemperature != null) preconditionTemperature.setText(
+            batteryTemperature.label(SystemClock.elapsedRealtime(), page == ScreenFlow.Page.HOME));
         if (preconditionDetail != null) preconditionDetail.setText(preconditioning.detail);
         if (preconditionIndicator != null) preconditionIndicator.setText(preconditioning.indicatorLabel());
         if (preconditionElapsed != null) preconditionElapsed.setText("Elapsed: " +
-            (preconditioning.requested || preconditioning.state == PreconditioningSnapshot.State.ENDED ? preconditioning.elapsed() : "—"));
+            (preconditioning.requested || preconditioning.state == PreconditioningSnapshot.State.ENDED
+                || preconditioning.state == PreconditioningSnapshot.State.TIMED_OUT ? preconditioning.elapsed() : "—"));
         if (preconditionFailure != null) preconditionFailure.setText("Failure reason: Unknown" +
             (preconditioning.failureRaw >= 0 ? " (raw " + preconditioning.failureRaw + ")" : ""));
         if (preconditionButton != null) {
-            preconditionButton.setText(preconditioning.requested ? "Stop" : "Start");
-            preconditionButton.setContentDescription(preconditioning.requested ? "Stop preconditioning" : "Start preconditioning");
+            boolean warm = preconditioning.state == PreconditioningSnapshot.State.WARM;
+            preconditionButton.setText(warm ? "Start\nanyway" : preconditioning.requested ? "Stop" : "Start");
+            preconditionButton.setTextSize(warm ? 14 : 18);
+            preconditionButton.setContentDescription(warm ? "Start preconditioning anyway" : preconditioning.requested ? "Stop preconditioning" : "Start preconditioning");
             boolean enabled = preconditioning.canStart || preconditioning.canStop;
             preconditionButton.setEnabled(enabled); preconditionButton.setAlpha(enabled ? 1f : 0.4f);
             if (knobIndex >= 0 && knobIndex < targets.size() && !targets.get(knobIndex).enabled()) moveKnob(1);

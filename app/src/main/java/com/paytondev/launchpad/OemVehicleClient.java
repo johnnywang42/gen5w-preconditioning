@@ -13,7 +13,7 @@ import java.util.Locale;
 final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Commands {
     private static final String HEV = "com.hkmc.hev.IHEVService", BCM = "com.hkmc.bcm.IBCMService";
     private IBinder hev, bcm;
-    private boolean firmwareChecked;
+    private volatile boolean firmwareChecked;
     private void connect(boolean requireIndicator) throws Exception {
         if (!PreconditioningProfile.supportsDevice(Build.VERSION.SDK_INT, Build.DEVICE))
             throw new IllegalStateException("Unsupported head-unit firmware");
@@ -37,6 +37,11 @@ final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Comm
             throw new IllegalStateException("Vehicle services unavailable or incompatible");
     }
     @Override public String unavailableReason() { return ""; }
+    @Override public Integer readMinimumBatteryTemperatureC() {
+        // read() must have passed exact firmware hashes first. No Ioniq assumptions.
+        if (!firmwareChecked || !PreconditioningProfile.EV6_DEVICE.equals(Build.DEVICE)) return null;
+        return Ev6BatteryTemperatureReader.read();
+    }
     @Override public Reading read() throws Exception {
         connect(true);
         int enabled = getter(hev, HEV, 3, 94);
