@@ -47,13 +47,19 @@ class Ev6ScriptsTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_tune_selection_keeps_key_duration_and_target(self):
+        ev6, neev_us, ioniq = ("daudio_wp_daudioplus_cvev_us", "daudio_wp_daudioplus_neev_us",
+                               "daudio_wp_daudioplus_neev23_us")
         cases = [
-            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "19", True),
-            ("wp_daudioplus_neev23_us", "original", "19", False),
-            ("wp_daudioplus_cvev_us", "other", "19", False),
-            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "20", False),
-            ("other", "CVEV.USA.0000.V015.012.260507", "19", False),
-            ("", "", "", False),
+            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "19", ev6),
+            ("wp_daudioplus_neev23_us", "original", "19", ioniq),
+            ("wp_daudioplus_cvev_us", "other", "19", ioniq),
+            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "20", ioniq),
+            ("other", "CVEV.USA.0000.V015.012.260507", "19", ioniq),
+            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "19", neev_us),
+            ("wp_daudioplus_neev_us", "other", "19", ioniq),
+            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "20", ioniq),
+            ("wp_daudioplus_cvev_us", "NEEV.USA.0000.V015.012.260507", "19", ioniq),
+            ("", "", "", ioniq),
         ]
         with tempfile.TemporaryDirectory(prefix="launchpad-tune-") as tmp:
             script = Path(tmp) / "profile.sh"
@@ -67,10 +73,9 @@ class Ev6ScriptsTest(unittest.TestCase):
 ''' + (ROOT / "tune-service/knob.conf").read_text() + '''
 printf '%s|%s|%s|%s' "$DEVICE_NAME" "$KEY_CODE" "$HOLD_MS" "$TARGET_COMPONENT"
 ''', newline="\n")
-            for device, software, sdk, ev6 in cases:
+            for device, software, sdk, expected in cases:
                 with self.subTest(device=device, software=software, sdk=sdk):
                     result = run(script, TEST_DEVICE=device, TEST_SOFTWARE=software, TEST_SDK=sdk)
-                    expected = "daudio_wp_daudioplus_cvev_us" if ev6 else "daudio_wp_daudioplus_neev23_us"
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(result.stdout, expected + "|17|800|com.paytondev.launchpad/.MainActivity")
 

@@ -14,6 +14,26 @@ It checks HEV service `com.hkmc.micom.hev` / descriptor
 feature unavailable. Do not remove these checks to support another firmware;
 establish its command and feedback profile first.
 
+## NEEV US 260507 profile
+
+The additional profile requires Android API 19, device `wp_daudioplus_neev_us`,
+and `ro.build.product=NEEV.USA.0000.V015.012.260507` (build `KVT49L`). A
+read-only USB capture on 2026-10-27 found both framework files byte-identical to
+the original Ioniq 5 profile, so it requires those same two fingerprints above.
+`com.hkmc.micom.hev` / `com.hkmc.hev.IHEVService` and `com.hkmc.micom.bcm` /
+`com.hkmc.bcm.IBCMService` were both present. No command or enum remapping was
+made.
+
+Holding TUNE was verified on that car on 2026-10-27: key 17 arrives on the main
+`daudio_wp_daudioplus_neev_us` input device (not its `_can` or `_knob`
+devices), so `knob.conf` selects that name on the exact NEEV US identity with
+the original 800 ms hold.
+
+Matching framework files show the Binder interface is the same code; they do not
+prove the vehicle MICOM/BMS behind it responds identically. Parked Start/Stop
+(Off -> Active -> Off) has not yet been observed on this profile. No firmware,
+raw logs, or disassembly are included.
+
 ## EV6 US 260507 profile
 
 **Other model years:** US-market 2022–2024 EV6 vehicles with the same Gen5W

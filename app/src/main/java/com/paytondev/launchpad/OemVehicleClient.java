@@ -20,7 +20,8 @@ final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Comm
         if (!firmwareChecked) {
             // Build.PRODUCT is ro.product.name, not the collected ro.build.product.
             String software = "";
-            if (PreconditioningProfile.EV6_DEVICE.equals(Build.DEVICE)) {
+            if (PreconditioningProfile.EV6_DEVICE.equals(Build.DEVICE)
+                || PreconditioningProfile.NEEV_US_DEVICE.equals(Build.DEVICE)) {
                 Method property = Class.forName("android.os.SystemProperties").getMethod("get", String.class);
                 software = (String) property.invoke(null, "ro.build.product");
             }

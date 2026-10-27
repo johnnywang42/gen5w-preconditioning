@@ -113,7 +113,8 @@ and passes the existing `from_knob` intent extra. It listens passively, without
 grabbing the input device or injecting events. Its profile expects device name
 `daudio_wp_daudioplus_neev23_us`, key code 17, and an 800 ms hold. On the exact
 EV6 US API 19 / 260507 identity, `knob.conf` selects
-`daudio_wp_daudioplus_cvev_us` with the same key and hold duration.
+`daudio_wp_daudioplus_cvev_us` with the same key and hold duration, and on the
+exact NEEV US API 19 / 260507 identity it selects `daudio_wp_daudioplus_neev_us`.
 
 Publish the three `Launchpad-*-usb.zip` files, `paytondev.launchpad.zip` (for
 manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These
