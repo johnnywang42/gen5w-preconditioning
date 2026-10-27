@@ -63,6 +63,7 @@ def main():
     copy_lf(ROOT / "tune-service/scripts/common.sh", scripts / "common.sh")
     copy_lf(ROOT / "usb/launchpad/lib.sh", scripts / "lib.sh")
     copy_lf(ROOT / "usb/launchpad/install.sh", scripts / "install.sh")
+    copy_lf(ROOT / "usb/README-template.txt", usb / "README.txt")
     (usb / "packages").mkdir()
     shutil.copy2(package_zip, usb / f"packages/{PACKAGE_ID}.zip")
     (usb / "NEMESIS.data").write_bytes(

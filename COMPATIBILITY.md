@@ -50,14 +50,17 @@ software `CV_E.USA.S5W_M.V015.012.260507`, with NEMESIS 1.15:
   staging, installation, rollback, and USB completion checks.
 
 These observations came from local builds carrying these changes, not from a
-published upstream release. Later local builds also contain temperature display
-and timeout improvements; those features are outside this contribution. The
+published upstream release. This follow-up now includes the temperature display,
+warm advisory and timeout from later local builds; their separate evidence and
+limits are in [TEMPERATURE-AND-TIMEOUT.md](TEMPERATURE-AND-TIMEOUT.md). The
 extracted source combination has host build/test coverage but has not itself
 been installed as a new vehicle build.
 
-No EV6 command/enum remapping was needed. Start/Stop sequencing, the controller
-lifecycle, package IDs, release version, and original Ioniq TUNE default remain
-unchanged. No raw vehicle logs, firmware, disassembly, APKs, or signing material
+No EV6 command/enum remapping was needed. Start/Stop command arguments, package
+IDs, release version, and original Ioniq TUNE default remain unchanged. The
+controller now adds a five-minute pending timeout for both profiles; native
+temperature reads and the warm advisory are restricted to the exact EV6 profile.
+No raw vehicle logs, firmware, disassembly, APKs, or signing material
 are included. This is evidence for the listed profile, not blanket EV6 support.
 
 Tests used no active Kia navigation route. Driving activation, interaction with

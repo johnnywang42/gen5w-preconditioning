@@ -14,18 +14,39 @@ import android.os.SystemClock;
 /** APK-contained ownership. There is no boot receiver and no automatic Start. */
 public final class PreconditioningService extends Service {
     static final String START = "com.paytondev.launchpad.PRECONDITION_START";
+    static final String START_ANYWAY = "com.paytondev.launchpad.PRECONDITION_START_ANYWAY";
     static final String STOP = "com.paytondev.launchpad.PRECONDITION_STOP";
     private static final int NOTIFICATION = 1203;
     private final LocalBinder binder = new LocalBinder();
     private HandlerThread thread;
     private Handler worker;
+    private HandlerThread temperatureThread;
+    private Handler temperatureWorker;
+    private volatile boolean temperatureVisible, destroyed;
+    private volatile int temperatureGeneration;
+    private volatile BatteryTemperatureReading temperature = BatteryTemperatureReading.checking();
     private PreconditioningController controller;
+    private VehiclePort vehicle;
     private SharedPreferences journal;
     private volatile PreconditioningSnapshot snapshot = PreconditioningSnapshot.checking();
     private boolean bound, foreground;
     final class LocalBinder extends Binder {
         PreconditioningSnapshot snapshot() { return snapshot; }
+        BatteryTemperatureReading temperature() { return temperature; }
     }
+    private final Runnable temperaturePoll = new Runnable() {
+        @Override public void run() {
+            if (!temperatureVisible || destroyed) return;
+            final int generation = temperatureGeneration;
+            final Integer value = vehicle.readMinimumBatteryTemperatureC();
+            final long receivedAt = SystemClock.elapsedRealtime();
+            worker.post(new Runnable() { @Override public void run() {
+                if (!bound || destroyed || generation != temperatureGeneration) return;
+                temperature = temperature.update(value, receivedAt);
+                temperatureWorker.postDelayed(temperaturePoll, BatteryTemperatureReading.REFRESH_MS);
+            } });
+        }
+    };
     private final Runnable tick = new Runnable() {
         @Override public void run() {
             controller.refresh(SystemClock.elapsedRealtime()); publish();
@@ -38,8 +59,12 @@ public final class PreconditioningService extends Service {
         journal = getSharedPreferences("launchpad_preconditioning", MODE_PRIVATE);
         thread = new HandlerThread("launchpad-vehicle"); thread.start();
         worker = new Handler(thread.getLooper());
+        temperatureThread = new HandlerThread("launchpad-temperature-display");
+        temperatureThread.start();
+        temperatureWorker = new Handler(temperatureThread.getLooper());
         worker.post(new Runnable() { @Override public void run() {
-            controller = new PreconditioningController(VehicleClientFactory.create(),
+            vehicle = VehicleClientFactory.create();
+            controller = new PreconditioningController(vehicle,
                 new PreconditioningController.Journal() {
                     @Override public void requested(boolean value) {
                         if (!journal.edit().putBoolean("requested", value).commit())
@@ -55,12 +80,17 @@ public final class PreconditioningService extends Service {
     @Override public IBinder onBind(Intent intent) {
         worker.post(new Runnable() { @Override public void run() {
             bound = true; worker.removeCallbacks(tick); tick.run();
+            temperatureVisible = true; temperatureGeneration++;
+            temperatureWorker.removeCallbacks(temperaturePoll);
+            temperatureWorker.post(temperaturePoll);
         } });
         return binder;
     }
     @Override public boolean onUnbind(Intent intent) {
         worker.post(new Runnable() { @Override public void run() {
             bound = false;
+            temperatureVisible = false; temperatureGeneration++;
+            temperatureWorker.removeCallbacks(temperaturePoll);
             if (!snapshot.requested) { worker.removeCallbacks(tick); stopSelf(); }
         } });
         return false;
@@ -70,9 +100,20 @@ public final class PreconditioningService extends Service {
             if (intent == null) return;
             if (START.equals(intent.getAction())) {
                 controller.refresh(SystemClock.elapsedRealtime());
-                if (controller.snapshot(SystemClock.elapsedRealtime()).canStart) {
-                    promote("Sending request");
-                    controller.start(SystemClock.elapsedRealtime());
+                if (controller.snapshot(SystemClock.elapsedRealtime()).canStart
+                        && controller.snapshot(SystemClock.elapsedRealtime()).state != PreconditioningSnapshot.State.WARM) {
+                    promote("Checking battery temperature");
+                    Integer minimum = vehicle.readMinimumBatteryTemperatureC();
+                    // Recheck READY/Off after the optional bounded telemetry read.
+                    controller.refresh(SystemClock.elapsedRealtime());
+                    controller.start(SystemClock.elapsedRealtime(), minimum);
+                }
+            }
+            else if (START_ANYWAY.equals(intent.getAction())) {
+                controller.refresh(SystemClock.elapsedRealtime());
+                if (controller.snapshot(SystemClock.elapsedRealtime()).state == PreconditioningSnapshot.State.WARM) {
+                    promote("Sending manual request");
+                    controller.startAnyway(SystemClock.elapsedRealtime());
                 }
             }
             else if (STOP.equals(intent.getAction())) controller.stop(SystemClock.elapsedRealtime());
@@ -99,6 +140,9 @@ public final class PreconditioningService extends Service {
             startForeground(NOTIFICATION, notification); foreground = true;
     }
     @Override public void onDestroy() {
+        destroyed = true; temperatureVisible = false;
+        if (temperatureWorker != null) temperatureWorker.removeCallbacksAndMessages(null);
+        if (temperatureThread != null) temperatureThread.quitSafely();
         if (worker != null) worker.removeCallbacksAndMessages(null);
         // Retain the ownership journal after unexpected destruction. Recovery attempts
         // cancellation, never Start. Do not claim cancellation from onDestroy alone.

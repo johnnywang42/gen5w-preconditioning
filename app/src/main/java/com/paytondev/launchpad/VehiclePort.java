@@ -11,6 +11,8 @@ interface VehiclePort {
     }
     String unavailableReason();
     Reading read() throws Exception;
+    /** Optional one-shot precheck. Unknown never prevents a manual request. */
+    default Integer readMinimumBatteryTemperatureC() { return null; }
     void beginManual() throws Exception;
     void maintainManual() throws Exception;
     void stopAndRelease() throws Exception;

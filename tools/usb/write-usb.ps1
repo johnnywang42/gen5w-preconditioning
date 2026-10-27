@@ -17,7 +17,7 @@ if (-not (Test-Path -LiteralPath $Drive -PathType Container)) { throw "$Drive is
 
 # Move (never delete) anything from a previous NEMESIS job out of the drive root.
 $backup = Join-Path $Drive ("NEMESIS-backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'launchpad', 'packages') {
+foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'ota_package.tar', 'README.txt', 'launchpad', 'packages') {
     $path = Join-Path $Drive $item
     if (Test-Path -LiteralPath $path) {
         New-Item -ItemType Directory -Force -Path $backup | Out-Null
@@ -29,7 +29,7 @@ foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'launchpad', 'packages') {
 # Expand-Archive copies bytes as-is, so the scripts keep their LF line endings.
 Expand-Archive -LiteralPath $zip -DestinationPath $Drive
 Write-Host "Wrote $name to $Drive"
-Get-ChildItem -LiteralPath $Drive -Name | Where-Object { $_ -in 'NEMESIS.data', 'launchpad', 'packages' }
+Get-ChildItem -LiteralPath $Drive -Name | Where-Object { $_ -in 'README.txt', 'NEMESIS.data', 'launchpad', 'packages' }
 Write-Host @"
 
 Next:
