@@ -10,8 +10,9 @@ Use a maintainer release whose notes explicitly support your head unit and
 software. EV6 support was tested on a US 2023 EV6 Wind RWD, Gen5W software
 CV_E.USA.S5W_M.V015.012.260507. Matching 2022-2024 US cars are untested.
 NEMESIS must already be installed. Engineering Mode is not needed for this step.
-If your installed APK was signed by another developer, arrange migration before
-updating; do not clear app data to force a certificate change.
+Each release is signed with its own key. The installer replaces
+/system/app/Launchpad.apk directly, so a different key does not block an
+update. Do not clear app data or change verifier settings.
 
 ON THE COMPUTER
 1. Use an empty FAT32 or exFAT USB, or back it up first.

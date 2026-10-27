@@ -157,5 +157,5 @@ fails if the two versions differ. The workflow needs no secrets.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for firmware and verification limits.
 See [RELEASE-PREPARATION.md](RELEASE-PREPARATION.md) for release decisions,
-field-test limits and the installer/signing handoff.
+field-test limits and the release steps.
 Icons retain the bundled [Phosphor license](app/src/main/assets/phosphor-LICENSE.txt).

@@ -138,8 +138,9 @@ disclosed; no artificial vehicle failure is required to test it. Failed-read
 recovery also remains unverified, and the observed display-resume issue above
 is a known limitation with a reopening workaround.
 
-Before publishing binaries, finalize the public installation, update, removal,
-and signing-migration path. Active-session process/power-loss
+Before publishing binaries, verify the public install/update USB bundle,
+including an update over a build signed with a different key, and removal from
+NEMESIS Manager. Active-session process/power-loss
 behavior, native-navigation coexistence, and driving activation remain unverified.
 These limits do not negate the owner's successful manual conditioning/display
 tests; they keep separate behaviors from being marked tested by inference.
