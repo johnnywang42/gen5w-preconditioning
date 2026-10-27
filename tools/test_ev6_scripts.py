@@ -47,19 +47,19 @@ class Ev6ScriptsTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_tune_selection_keeps_key_duration_and_target(self):
-        ev6, neev_us, ioniq = ("daudio_wp_daudioplus_cvev_us", "daudio_wp_daudioplus_neev_us",
+        ev6, ioniq5_neev_us, ioniq5_neev23_us = ("daudio_wp_daudioplus_cvev_us", "daudio_wp_daudioplus_neev_us",
                                "daudio_wp_daudioplus_neev23_us")
         cases = [
             ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "19", ev6),
-            ("wp_daudioplus_neev23_us", "original", "19", ioniq),
-            ("wp_daudioplus_cvev_us", "other", "19", ioniq),
-            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "20", ioniq),
-            ("other", "CVEV.USA.0000.V015.012.260507", "19", ioniq),
-            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "19", neev_us),
-            ("wp_daudioplus_neev_us", "other", "19", ioniq),
-            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "20", ioniq),
-            ("wp_daudioplus_cvev_us", "NEEV.USA.0000.V015.012.260507", "19", ioniq),
-            ("", "", "", ioniq),
+            ("wp_daudioplus_neev23_us", "original", "19", ioniq5_neev23_us),
+            ("wp_daudioplus_cvev_us", "other", "19", ioniq5_neev23_us),
+            ("wp_daudioplus_cvev_us", "CVEV.USA.0000.V015.012.260507", "20", ioniq5_neev23_us),
+            ("other", "CVEV.USA.0000.V015.012.260507", "19", ioniq5_neev23_us),
+            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "19", ioniq5_neev_us),
+            ("wp_daudioplus_neev_us", "other", "19", ioniq5_neev23_us),
+            ("wp_daudioplus_neev_us", "NEEV.USA.0000.V015.012.260507", "20", ioniq5_neev23_us),
+            ("wp_daudioplus_cvev_us", "NEEV.USA.0000.V015.012.260507", "19", ioniq5_neev23_us),
+            ("", "", "", ioniq5_neev23_us),
         ]
         with tempfile.TemporaryDirectory(prefix="launchpad-tune-") as tmp:
             script = Path(tmp) / "profile.sh"
