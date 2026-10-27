@@ -57,7 +57,7 @@ The script runs tests/lint, builds, removes prior ZIP signature metadata, signs
 with the existing v1 SHA1/RSA procedure, aligns the APK, and verifies the
 signature for API 19. The final artifact is `dist/Launchpad.apk`.
 
-## NEMESIS package and USB install/update/uninstall bundles
+## NEMESIS package and USB install bundle
 
 ```sh
 python3 tools/build_usb_bundles.py            # uses dist/Launchpad.apk
@@ -74,30 +74,30 @@ Outputs in `dist/`:
 
 - `paytondev.launchpad.zip`: the NEMESIS package (`tune-service/` plus
   `app/Launchpad.apk`).
-- `Launchpad-install-usb.zip`, `Launchpad-update-usb.zip`,
-  `Launchpad-uninstall-usb.zip`: USB drive roots. Each has a `type=execute`
-  `NEMESIS.data` that runs `launchpad/<action>.sh` (from `usb/launchpad/`, with
-  a copy of `tune-service/scripts/common.sh`). Install and update also carry
+- `Launchpad-install-usb.zip`: the USB drive root. Its `type=execute`
+  `NEMESIS.data` runs `launchpad/install.sh` (from `usb/launchpad/`, with a copy
+  of `tune-service/scripts/common.sh`) against
   `packages/paytondev.launchpad.zip`.
 
-`tools/usb/write-usb.sh` / `write-usb.ps1` write a bundle onto a drive. They
+`tools/usb/write-usb.sh` / `write-usb.ps1` write the bundle onto a drive. They
 move any previous NEMESIS files on it into a backup folder rather than deleting
 them.
 
 How it works on the car:
 
-- **install**: `nemesis install`. The package's `postinstall` stages and
-  verifies the APK in `/data/local/tmp/launchpad`, then writes
-  `/system/app/Launchpad.apk`. It checks free space first, compares the result
-  byte for byte, and restores the previous APK if that check fails.
-- **update**: `nemesis install --update`. NEMESIS runs the old package's
-  `preuninstall`, which sees the new package in NEMESIS's stage directory and
-  leaves the APK in place. The new `postinstall` then rewrites it in place, so
-  app data survives. The `type=install` USB descriptor can't do this, because
-  with Android up NEMESIS answers "uninstall first".
-- **uninstall**: `nemesis uninstall`. `preuninstall` force-stops the app and
-  removes `/system/app/Launchpad.apk`. The USB script also removes an APK left
-  by a manual install.
+- **install** (package not registered): `nemesis install`. The package's
+  `postinstall` stages and verifies the APK in `/data/local/tmp/launchpad`, then
+  writes `/system/app/Launchpad.apk`. It checks free space first, compares the
+  result byte for byte, and restores the previous APK if that check fails.
+- **update** (same drive, package already registered): `nemesis install
+  --update`. NEMESIS runs the old package's `preuninstall`, which sees the new
+  package in NEMESIS's stage directory and leaves the APK in place. The new
+  `postinstall` then rewrites it in place, so app data survives. A plain
+  `type=install` USB descriptor isn't used because, on the firmware this was
+  tested on, NEMESIS answered "uninstall first" with Android up.
+- **uninstall**: NEMESIS Manager → Packages → Uninstall, or `nemesis uninstall
+  paytondev.launchpad`. `preuninstall` force-stops the app and removes
+  `/system/app/Launchpad.apk`. There is no USB uninstall bundle.
 
 Rule for these scripts: the only file under `/system` they may write or remove
 is `/system/app/Launchpad.apk`. `/system` is remounted rw (`nemesis remount`)
@@ -111,7 +111,7 @@ and passes the existing `from_knob` intent extra. It listens passively, without
 grabbing the input device or injecting events. Its profile expects device name
 `daudio_wp_daudioplus_neev23_us`, key code 17, and an 800 ms hold.
 
-Publish the three `Launchpad-*-usb.zip` files, `paytondev.launchpad.zip` (for
+Publish `Launchpad-install-usb.zip`, `paytondev.launchpad.zip` (for
 manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These
 scripts generate local artifacts only and never connect to a car.
 
