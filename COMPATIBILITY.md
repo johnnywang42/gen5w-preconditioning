@@ -16,6 +16,8 @@ establish its command and feedback profile first.
 
 ## NEEV US 260507 profile
 
+Verified vehicle: **US 2022 Hyundai Ioniq 5**.
+
 The additional profile requires Android API 19, device `wp_daudioplus_neev_us`,
 and `ro.build.product=NEEV.USA.0000.V015.012.260507` (build `KVT49L`). A
 read-only USB capture on 2026-10-27 found both framework files byte-identical to
@@ -29,10 +31,15 @@ Holding TUNE was verified on that car on 2026-10-27: key 17 arrives on the main
 devices), so `knob.conf` selects that name on the exact NEEV US identity with
 the original 800 ms hold.
 
-Matching framework files show the Binder interface is the same code; they do not
-prove the vehicle MICOM/BMS behind it responds identically. Parked Start/Stop
-(Off -> Active -> Off) has not yet been observed on this profile. No firmware,
-raw logs, or disassembly are included.
+Parked Start/Stop (Off -> Active -> Off) was field tested successfully on that
+car on 2026-10-27. Matching framework files show the Binder interface is the
+same code; they do not prove the vehicle MICOM/BMS behind it responds
+identically on other cars. No firmware, raw logs, or disassembly are included.
+
+**Other model years:** other US-market Ioniq 5 vehicles reporting this exact
+device, software version, and both firmware fingerprints may also be
+compatible, but have not been tested beyond the verified **US 2022 Ioniq 5**.
+Model year alone does not establish compatibility.
 
 ## EV6 US 260507 profile
 
