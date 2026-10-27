@@ -15,11 +15,17 @@ final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Comm
     private IBinder hev, bcm;
     private boolean firmwareChecked;
     private void connect(boolean requireIndicator) throws Exception {
-        if (Build.VERSION.SDK_INT != 19 || !PreconditioningProfile.DEVICE.equals(Build.DEVICE))
+        if (!PreconditioningProfile.supportsDevice(Build.VERSION.SDK_INT, Build.DEVICE))
             throw new IllegalStateException("Unsupported head-unit firmware");
         if (!firmwareChecked) {
-            if (!PreconditioningProfile.FRAMEWORK_SHA256.equals(hash("/system/framework/automotive.odex"))
-                || !PreconditioningProfile.SERVICE_SHA256.equals(hash("/system/framework/automotive-service.odex")))
+            // Build.PRODUCT is ro.product.name, not the collected ro.build.product.
+            String software = "";
+            if (PreconditioningProfile.EV6_DEVICE.equals(Build.DEVICE)) {
+                Method property = Class.forName("android.os.SystemProperties").getMethod("get", String.class);
+                software = (String) property.invoke(null, "ro.build.product");
+            }
+            if (!PreconditioningProfile.matchesFirmware(Build.VERSION.SDK_INT, Build.DEVICE, software,
+                hash("/system/framework/automotive.odex"), hash("/system/framework/automotive-service.odex")))
                 throw new IllegalStateException("Vehicle interface version differs from the inspected firmware");
             firmwareChecked = true;
         }
