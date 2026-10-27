@@ -32,11 +32,11 @@ finished release. Building does not connect to the car.
 
 ## Signed, API 19-compatible release
 
-Signing keys and passwords are deliberately not included. Obtain the original
-private key from the maintainer to produce an update with the existing release
-certificate. A new key will produce a different certificate and may prevent
-updates; do not delete installed app data or change verifier settings to work
-around that difference.
+Signing keys and passwords are deliberately not included; any key works. The
+NEMESIS package writes `/system/app/Launchpad.apk` directly instead of going
+through `pm install`, so builds don't have to share a certificate, and CI signs
+each build with a new throwaway key. Don't change verifier settings or use
+`adb install` to work around a signing error.
 
 Set these environment variables privately, without committing them:
 
@@ -114,6 +114,23 @@ grabbing the input device or injecting events. Its profile expects device name
 Publish the three `Launchpad-*-usb.zip` files, `paytondev.launchpad.zip` (for
 manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These
 scripts generate local artifacts only and never connect to a car.
+
+## Continuous integration
+
+`.github/workflows/build.yml` runs the same commands as above:
+
+- **Pull requests**: tests, lint and an unsigned release build. No secrets.
+- **Merges to `main`** (or a manual run on `main`): generates a throwaway
+  signing key, runs `tools/build_apk.sh` with it, then
+  `tools/build_usb_bundles.py`, then `SHA256SUMS.txt`. The files are kept as a
+  workflow artifact and uploaded to the draft release `v<versionName>`. There is
+  one draft per version: each merge retargets it to the new commit and replaces
+  its assets, leaving the notes alone. Publishing creates the tag.
+
+Once `v<versionName>` is published, later merges only produce the workflow
+artifact. To start the next draft, bump `versionName`/`versionCode` in
+`app/build.gradle.kts` and `version=` in `tune-service/NEMESIS.data`; the job
+fails if the two versions differ. The workflow needs no secrets.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for firmware and verification limits.
 Icons retain the bundled [Phosphor license](app/src/main/assets/phosphor-LICENSE.txt).
