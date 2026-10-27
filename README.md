@@ -48,7 +48,7 @@ once that's done, delete `ota_package.tar` from the drive (or use a different dr
 
 ### 2. put the Launchpad installer on the drive
 
-download **`Launchpad-install-usb.zip`** from the [latest release](../../releases/latest).
+download **`Launchpad-install-usb.zip`** from the [releases page](../../releases) (the newest one is at the top).
 
 extract it so its **contents** sit at the **root** of the drive, with nothing else from NEMESIS left on it. the drive should look exactly like this:
 
@@ -75,12 +75,12 @@ USB drive/
 it does the same thing, and moves anything NEMESIS-related already on the drive into a `NEMESIS-backup-<date>` folder instead of overwriting it.
 
 ```sh
-sh tools/usb/write-usb.sh install /Volumes/YOUR_USB ~/Downloads
+sh tools/usb/write-usb.sh /Volumes/YOUR_USB ~/Downloads
 ```
 
 on Windows PowerShell:
 ```powershell
-.\tools\usb\write-usb.ps1 install E:\ $HOME\Downloads
+.\tools\usb\write-usb.ps1 E:\ $HOME\Downloads
 ```
 
 the last argument is the folder you downloaded the zip to.
@@ -99,7 +99,7 @@ the installer writes **`launchpad-install.log`** to the drive. if the dialog say
 
 reboot the headunit with the pinhole button and remove the drive. once it's back up, **hold the TUNE knob for about a second** and Launchpad should open.
 
-you only need the USB drive again to update or uninstall.
+you only need the USB drive again to update.
 
 ## using it
 
@@ -113,20 +113,17 @@ press **Stop** to cancel, including while it's still waiting. closing Launchpad 
 
 ## updating
 
-same as installing, but with **`Launchpad-update-usb.zip`** from the newest release (helper: `write-usb.sh update ...`). the log is `launchpad-update.log`. reboot afterwards.
+exactly the same as installing: put **`Launchpad-install-usb.zip`** from the newest release on the drive, run it, and reboot. when Launchpad is already installed, it updates it in place, and the log says so.
 
-with a compatible signing certificate, your favorites and settings are kept. the update replaces the app in place instead of removing it first. a developer-signed or independently built APK needs a signing-migration plan before using the maintainer's updater; do not clear app data to force it. an older manual (ADB) installation also needs a compatible certificate. the update script can install if nothing is installed yet.
-
-> [!NOTE]
-> if you plug in the **install** drive when Launchpad is already installed, it stops and tells you to use the update drive. running a drive twice is harmless.
+your favorites and settings are kept. the update replaces the app in place instead of removing it first. it also works if you installed an older version with the old manual (ADB) instructions. running the drive twice is harmless.
 
 ## uninstalling
 
 1. if preconditioning is running, press **Stop** and wait for it to end.
-2. same steps as installing, but with **`Launchpad-uninstall-usb.zip`** (helper: `write-usb.sh uninstall ...`). the log is `launchpad-uninstall.log`.
+2. open NEMESIS Manager (press NAV three times) → **Packages** → **Launchpad** → **Uninstall**. over ADB, `nemesis uninstall paytondev.launchpad` does the same.
 3. reboot the headunit.
 
-this removes Launchpad and its TUNE-hold service. it also works if you installed with the old manual instructions. NEMESIS stays installed. if you want that gone too, use **Wipe NEMESIS** in NEMESIS Manager. see the [NEMESIS docs](https://github.com/xwtk/hmg_nemesis/blob/main/03-Install-and-Uninstall.md#5-uninstall-wipe).
+this removes Launchpad, its TUNE-hold service and `/system/app/Launchpad.apk`. if you installed with the old manual instructions and Launchpad isn't in the Packages list, run the USB installer once first, then uninstall. NEMESIS stays installed. if you want that gone too, use **Wipe NEMESIS** in NEMESIS Manager. see the [NEMESIS docs](https://github.com/xwtk/hmg_nemesis/blob/main/03-Install-and-Uninstall.md#5-uninstall-wipe).
 
 ## troubleshooting
 
@@ -134,7 +131,7 @@ this removes Launchpad and its TUNE-hold service. it also works if you installed
 | --- | --- |
 | nothing happens when you plug in the drive | make sure `NEMESIS.data` is in the **root** of the drive, not in a folder. check the drive is FAT32/exFAT and in a data port. check NEMESIS is installed (press NAV three times; Manager should open). |
 | "Invalid package descriptor" | the files were edited or copied incompletely. extract the zip again onto the drive. |
-| the dialog says it failed | open `launchpad-<install/update/uninstall>.log` on the drive. for more detail, open NEMESIS Manager → **Logs** → **Copy to USB**, which writes a `NEMESIS-logs` folder to the drive. |
+| the dialog says it failed | open `launchpad-install.log` on the drive. for more detail, open NEMESIS Manager → **Logs** → **Copy to USB**, which writes a `NEMESIS-logs` folder to the drive. |
 | "not enough space on /system" in the log | nothing was changed. message me with the log. |
 | holding TUNE doesn't open Launchpad | reboot once more. in NEMESIS Manager → **Services**, `paytondev.launchpad/knobd` should be running. a different headunit may need a different TUNE profile; message me. |
 | preconditioning says **Unavailable** | your firmware doesn't match the checked profile, so Launchpad won't send commands. see [COMPATIBILITY.md](COMPATIBILITY.md). |

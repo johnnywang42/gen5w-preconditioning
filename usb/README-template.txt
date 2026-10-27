@@ -1,16 +1,18 @@
-Launchpad - @ACTION@ USB
+Launchpad - install/update USB
 
-This drive runs the @ACTION@ action. Use only ONE action bundle on a drive.
-Install is for a first installation; update replaces an existing installation;
-uninstall removes Launchpad and its TUNE shortcut, leaving NEMESIS installed.
+This drive installs Launchpad, or updates it in place if it is already
+installed. To remove Launchpad and its TUNE shortcut, use NEMESIS Manager ->
+Packages -> Launchpad -> Uninstall; NEMESIS stays installed. There is no
+uninstall drive.
 
 BEFORE YOU BEGIN
 Use a maintainer release whose notes explicitly support your head unit and
 software. EV6 support was tested on a US 2023 EV6 Wind RWD, Gen5W software
 CV_E.USA.S5W_M.V015.012.260507. Matching 2022-2024 US cars are untested.
 NEMESIS must already be installed. Engineering Mode is not needed for this step.
-If your installed APK was signed by another developer, arrange migration before
-updating; do not clear app data to force a certificate change.
+Each release is signed with its own key. The installer replaces
+/system/app/Launchpad.apk directly, so a different key does not block an
+update. Do not clear app data or change verifier settings.
 
 ON THE COMPUTER
 1. Use an empty FAT32 or exFAT USB, or back it up first.
@@ -18,12 +20,12 @@ ON THE COMPUTER
    items off the drive so another installer cannot run by accident.
 3. Extract the outer ZIP. Copy its CONTENTS to the drive, not the outer folder.
    NEMESIS.data and this README.txt must be visible immediately on opening it.
-   Leave packages/paytondev.launchpad.zip zipped (uninstall has no package ZIP).
+   Leave packages/paytondev.launchpad.zip zipped.
 4. Safely eject the drive.
 
 IN THE CAR
 1. Park and keep the car on READY. Wait for infotainment to finish starting.
-2. Before update/removal, Stop any pending or active manual conditioning session
+2. Before updating or uninstalling, Stop any pending or active manual session
    and confirm Advanced shows Car indicator: Off. Closing Launchpad is not Stop.
 3. Insert the drive into the USB DATA port used for wired Android Auto/CarPlay.
 4. Accept the NEMESIS USB execution prompt. If it expires, reinsert the drive.
@@ -48,8 +50,8 @@ If it becomes stale after leaving/returning, try reopening Launchpad. This
 restored updates in the reported test after conditioning ended. A stale value
 does not establish whether the battery is warm or conditioning is active.
 
-IF THE ACTION FAILS
-Keep launchpad-@ACTION@.log from this drive. Open NEMESIS Manager with three
+IF IT FAILS
+Keep launchpad-install.log from this drive. Open NEMESIS Manager with three
 quick NAV presses, or three SETUP presses if you configured that shortcut.
 Use Logs -> Copy to USB. Retain NEMESIS-logs as well. Do not repeatedly reinstall
 or clear app data. Report the release, model/year/market, full software version,

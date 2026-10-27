@@ -39,7 +39,7 @@ class UsbBundleTest(unittest.TestCase):
             [sys.executable, str(self.root / "tools/build_usb_bundles.py"),
              "--apk", str(self.apk)], capture_output=True, text=True, timeout=30)
 
-    def test_action_bundles_match_descriptor_and_payload(self):
+    def test_bundle_matches_descriptor_and_payload(self):
         # Exercise LF conversion as well as normal Windows source checkouts.
         source = self.root / "usb/launchpad/install.sh"
         source.write_bytes(source.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
@@ -53,23 +53,22 @@ class UsbBundleTest(unittest.TestCase):
             self.assertEqual(set(package.namelist()), expected | {"app/Launchpad.apk"})
             for name in expected:
                 self.assertNotIn(b"\r", package.read(name), name)
-        for action in ("install", "update", "uninstall"):
-            with self.subTest(action=action), zipfile.ZipFile(
-                    self.root / f"dist/Launchpad-{action}-usb.zip") as bundle:
-                expected = {"README.txt", "NEMESIS.data", "launchpad/common.sh",
-                            "launchpad/lib.sh", f"launchpad/{action}.sh"}
-                if action != "uninstall":
-                    expected.add("packages/paytondev.launchpad.zip")
-                    self.assertEqual(bundle.read("packages/paytondev.launchpad.zip"), package_bytes)
-                self.assertEqual(set(bundle.namelist()), expected)
-                self.assertEqual(bundle.read("NEMESIS.data").decode(),
-                                 f"[nemesis]\nversion=1.0\ntype=execute\npath=launchpad/{action}.sh\n")
-                readme = bundle.read("README.txt").decode("utf-8")
-                self.assertIn(f"Launchpad - {action} USB", readme)
-                self.assertIn(f"launchpad-{action}.log", readme)
-                self.assertNotIn("@ACTION@", readme)
-                for name in expected - {"packages/paytondev.launchpad.zip"}:
-                    self.assertNotIn(b"\r", bundle.read(name), name)
+        # One bundle installs or updates; uninstall is NEMESIS Manager's button.
+        self.assertEqual(sorted(p.name for p in (self.root / "dist").glob("Launchpad-*-usb.zip")),
+                         ["Launchpad-install-usb.zip"])
+        with zipfile.ZipFile(self.root / "dist/Launchpad-install-usb.zip") as bundle:
+            expected = {"README.txt", "NEMESIS.data", "launchpad/common.sh",
+                        "launchpad/lib.sh", "launchpad/install.sh",
+                        "packages/paytondev.launchpad.zip"}
+            self.assertEqual(set(bundle.namelist()), expected)
+            self.assertEqual(bundle.read("packages/paytondev.launchpad.zip"), package_bytes)
+            self.assertEqual(bundle.read("NEMESIS.data").decode(),
+                             "[nemesis]\nversion=1.0\ntype=execute\npath=launchpad/install.sh\n")
+            readme = bundle.read("README.txt").decode("utf-8")
+            self.assertIn("Launchpad - install/update USB", readme)
+            self.assertIn("launchpad-install.log", readme)
+            for name in expected - {"packages/paytondev.launchpad.zip"}:
+                self.assertNotIn(b"\r", bundle.read(name), name)
 
     def test_reject_unsigned_input_before_creating_bundles(self):
         result = self.build({"classes.dex": b"fixture-not-dex"})
@@ -99,7 +98,7 @@ class UsbBundleTest(unittest.TestCase):
             self.assertEqual((backups[0] / name).read_text(encoding="utf-8"), "old " + name)
         self.assertFalse((drive / "ota_package.tar").exists())
         self.assertEqual((drive / "personal.txt").read_text(encoding="utf-8"), "keep")
-        with zipfile.ZipFile(self.root / "dist/Launchpad-update-usb.zip") as bundle:
+        with zipfile.ZipFile(self.root / "dist/Launchpad-install-usb.zip") as bundle:
             for name in bundle.namelist():
                 self.assertEqual((drive / name).read_bytes(), bundle.read(name), name)
 
@@ -108,7 +107,7 @@ class UsbBundleTest(unittest.TestCase):
         if not powershell:
             self.skipTest("PowerShell is not installed")
         self.check_writer(lambda drive: [powershell, "-NoProfile", "-ExecutionPolicy", "Bypass",
-            "-File", str(self.root / "tools/usb/write-usb.ps1"), "-Action", "update",
+            "-File", str(self.root / "tools/usb/write-usb.ps1"),
             "-Drive", str(drive), "-BundleDir", str(self.root / "dist")])
 
     def test_shell_writer_preserves_old_readme_and_ota(self):
@@ -122,7 +121,7 @@ class UsbBundleTest(unittest.TestCase):
             value = path.resolve().as_posix()
             return "/" + value[0].lower() + value[2:] if os.name == "nt" else value
         self.check_writer(lambda drive: [bash, shell_path(self.root / "tools/usb/write-usb.sh"),
-            "update", shell_path(drive), shell_path(self.root / "dist")])
+            shell_path(drive), shell_path(self.root / "dist")])
 
 
 if __name__ == "__main__":

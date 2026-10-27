@@ -1,21 +1,21 @@
 #!/bin/sh
 # Write a Launchpad USB bundle onto a FAT32/exFAT drive. Runs on your computer;
 # does not connect to the car.
-#   tools/usb/write-usb.sh install|update|uninstall /Volumes/USB [bundle-dir]
-# bundle-dir holds Launchpad-<action>-usb.zip (default: ./dist, then the current dir).
+#   tools/usb/write-usb.sh /Volumes/USB [bundle-dir]
+# bundle-dir holds Launchpad-install-usb.zip (default: ./dist, then the current dir).
+# The same drive installs or updates Launchpad.
 set -eu
-usage() { echo "usage: $0 install|update|uninstall <usb-drive-path> [bundle-dir]" >&2; exit 2; }
-[ $# -ge 2 ] || usage
-ACTION=$1
-DRIVE=$2
-case "$ACTION" in install|update|uninstall) ;; *) usage ;; esac
+usage() { echo "usage: $0 <usb-drive-path> [bundle-dir]" >&2; exit 2; }
+[ $# -ge 1 ] || usage
+DRIVE=$1
+NAME=Launchpad-install-usb.zip
 ZIP=
-find_zip() { [ -z "$ZIP" ] && [ -f "$1/Launchpad-$ACTION-usb.zip" ] && ZIP=$1/Launchpad-$ACTION-usb.zip; return 0; }
-[ $# -ge 3 ] && find_zip "$3"
+find_zip() { [ -z "$ZIP" ] && [ -f "$1/$NAME" ] && ZIP=$1/$NAME; return 0; }
+[ $# -ge 2 ] && find_zip "$2"
 find_zip "$(dirname "$0")/../../dist"
 find_zip dist
 find_zip .
-[ -n "$ZIP" ] || { echo "Launchpad-$ACTION-usb.zip not found; pass the folder you downloaded it to." >&2; exit 1; }
+[ -n "$ZIP" ] || { echo "$NAME not found; pass the folder you downloaded it to." >&2; exit 1; }
 [ -d "$DRIVE" ] && [ -w "$DRIVE" ] || { echo "$DRIVE is not a writable directory (is the drive mounted?)" >&2; exit 1; }
 command -v unzip >/dev/null || { echo "unzip is required" >&2; exit 1; }
 
@@ -39,5 +39,5 @@ Next:
   1. Eject the drive, insert it into the car's USB data port (car on, parked).
   2. Tap Yes on the NEMESIS prompt and wait for the result dialog.
   3. Reboot the head unit (pinhole button), then remove the drive.
-  The log is written to launchpad-$ACTION.log on the drive.
+  The log is written to launchpad-install.log on the drive.
 EOF

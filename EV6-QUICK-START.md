@@ -46,8 +46,9 @@ Launchpad after installation. These are separate shortcuts.
 
 1. From the maintainer's [release page](https://github.com/paytondevs/ioniq5-preconditioning/releases),
    choose a release explicitly listing EV6 US 260507 support.
-2. Download **`Launchpad-install-usb.zip`** for a first installation. If Launchpad
-   is already installed, read **Updating** below first.
+2. Download **`Launchpad-install-usb.zip`**. The same drive installs Launchpad
+   or updates an existing installation; read **Updating** below first if
+   Launchpad is already installed.
 3. Use an empty drive, or back up its contents to your computer. Move any old
    `NEMESIS.data`, `NEMESIS.sh`, `ota_package.tar`, `README.txt`, `launchpad`, and
    `packages` items off the drive before copying a new bundle.
@@ -164,29 +165,26 @@ it continues waiting instead of claiming success. Keep the logs if this happens.
 
 ## Updating
 
-Use **`Launchpad-update-usb.zip`** from the same maintainer's release series and
-follow the installation steps above, starting with stopping any pending or
-active session. Its USB layout has `update.sh` instead of `install.sh`. Update
-logs are named **`launchpad-update.log`**.
-
-If you installed a developer-signed or independently built APK, do not assume
-the maintainer's updater can replace it. Ask for a migration plan first; the
-signing certificates may differ. Do not clear app data to force an update.
+Use **`Launchpad-install-usb.zip`** from a newer release and follow the
+installation steps above, starting with stopping any pending or active session.
+When Launchpad is already installed, the installer updates it in place and keeps
+its settings; `launchpad-install.log` says it updated. Do not clear app data to
+force an update.
 
 ## Removing Launchpad
 
-Stop any pending or active session and confirm **Off**. Use the maintainer's
-**`Launchpad-uninstall-usb.zip`**, accept the USB prompt, wait for success, then
-remove the drive and restart infotainment. This removes Launchpad and its TUNE
-service; it leaves NEMESIS installed. Its layout has `uninstall.sh` and no
-`packages` folder. Keep `launchpad-uninstall.log` if anything fails.
+Stop any pending or active session and confirm **Off**. Open NEMESIS Manager,
+then **Packages -> Launchpad -> Uninstall**, and restart infotainment. This
+removes Launchpad, its TUNE service and `/system/app/Launchpad.apk`; it leaves
+NEMESIS installed. If it fails, use **Logs -> Copy to USB** and keep
+`NEMESIS-logs`.
 
 ## If something goes wrong
 
 | What you see | What to do |
 | --- | --- |
 | Only "No supported files" and no NEMESIS prompt | Check NEMESIS is installed, the drive uses a data port, and `NEMESIS.data` is at the drive's top level. The media-player message alone does not diagnose NEMESIS. |
-| Install/update reports failure | Keep the USB inserted. Open NEMESIS Manager, then **Logs -> Copy to USB**. Bring it back to the computer and keep `launchpad-install.log` (or the update/uninstall equivalent) and `NEMESIS-logs`. |
+| Install/update reports failure | Keep the USB inserted. Open NEMESIS Manager, then **Logs -> Copy to USB**. Bring it back to the computer and keep `launchpad-install.log` and `NEMESIS-logs`. |
 | Holding TUNE does nothing | Confirm you restarted infotainment after installation. In NEMESIS **Services**, check `paytondev.launchpad/knobd`. Report its status along with your software version. |
 | Preconditioning is Unavailable | Read the reason shown in Advanced. Confirm READY and Battery conditioning mode; a firmware mismatch needs investigation, not disabled compatibility checks. |
 | It stays Request sent | The car has not confirmed activation. Tap Stop, or let the five-minute pending timeout request cancellation. Do not assume warmth from this message. |

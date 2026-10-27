@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the NEMESIS package and USB install/update/uninstall bundles; never installs or connects to a car."""
+"""Build the NEMESIS package and the USB install bundle; never installs or connects to a car."""
 import argparse
 from pathlib import Path
 import shutil
@@ -7,7 +7,6 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ID = "paytondev.launchpad"
-ACTIONS = ("install", "update", "uninstall")
 
 def pack(source, destination):
     with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -56,24 +55,22 @@ def main():
     package_zip = dist / f"{PACKAGE_ID}.zip"
     pack(package, package_zip)
 
-    for action in ACTIONS:
-        usb = stage / action
-        scripts = usb / "launchpad"
-        scripts.mkdir(parents=True)
-        copy_lf(ROOT / "tune-service/scripts/common.sh", scripts / "common.sh")
-        copy_lf(ROOT / "usb/launchpad/lib.sh", scripts / "lib.sh")
-        copy_lf(ROOT / f"usb/launchpad/{action}.sh", scripts / f"{action}.sh")
-        instructions = (ROOT / "usb/README-template.txt").read_text(encoding="utf-8")
-        (usb / "README.txt").write_bytes(
-            instructions.replace("@ACTION@", action).encode("utf-8"))
-        if action != "uninstall":
-            (usb / "packages").mkdir()
-            shutil.copy2(package_zip, usb / f"packages/{PACKAGE_ID}.zip")
-        (usb / "NEMESIS.data").write_bytes(
-            f"[nemesis]\nversion=1.0\ntype=execute\npath=launchpad/{action}.sh\n".encode())
-        out = dist / f"Launchpad-{action}-usb.zip"
-        pack(usb, out)
-        print(out)
+    # install.sh also updates in place; uninstall is NEMESIS Manager's Uninstall
+    # button, which runs the package's preuninstall.
+    usb = stage / "install"
+    scripts = usb / "launchpad"
+    scripts.mkdir(parents=True)
+    copy_lf(ROOT / "tune-service/scripts/common.sh", scripts / "common.sh")
+    copy_lf(ROOT / "usb/launchpad/lib.sh", scripts / "lib.sh")
+    copy_lf(ROOT / "usb/launchpad/install.sh", scripts / "install.sh")
+    copy_lf(ROOT / "usb/README-template.txt", usb / "README.txt")
+    (usb / "packages").mkdir()
+    shutil.copy2(package_zip, usb / f"packages/{PACKAGE_ID}.zip")
+    (usb / "NEMESIS.data").write_bytes(
+        b"[nemesis]\nversion=1.0\ntype=execute\npath=launchpad/install.sh\n")
+    out = dist / "Launchpad-install-usb.zip"
+    pack(usb, out)
+    print(out)
     print(package_zip)
 
 if __name__ == "__main__":
