@@ -5,6 +5,23 @@ final class PreconditioningProfile {
     static final String DEVICE = "wp_daudioplus_neev23_us";
     static final String FRAMEWORK_SHA256 = "dd72e04bce0a2b4bda1506308ac21f91002c1436553b8156c345cc4313661338";
     static final String SERVICE_SHA256 = "3cf40fb00854c63afa49abea1dad18a0afcbc0dd68b17de9ed7ea3f5aeab4222";
+    static final String EV6_DEVICE = "wp_daudioplus_cvev_us";
+    static final String EV6_SOFTWARE = "CVEV.USA.0000.V015.012.260507";
+    static final String EV6_FRAMEWORK_SHA256 = "b9e7e02b81e1a8cfcf767c6b8bbb28bcf1d2c411a208fbf6a465e7f0c662774a";
+    static final String EV6_SERVICE_SHA256 = "8af745b41aa28f490953d61531215cd94e059f104b31f6236a8f6c7af23b8062";
+
+    static boolean supportsDevice(int sdk, String device) {
+        return sdk == 19 && (DEVICE.equals(device) || EV6_DEVICE.equals(device));
+    }
+    static boolean matchesFirmware(int sdk, String device, String software,
+                                   String frameworkHash, String serviceHash) {
+        if (!supportsDevice(sdk, device)) return false;
+        if (DEVICE.equals(device)) {
+            return FRAMEWORK_SHA256.equals(frameworkHash) && SERVICE_SHA256.equals(serviceHash);
+        }
+        return EV6_SOFTWARE.equals(software) && EV6_FRAMEWORK_SHA256.equals(frameworkHash)
+            && EV6_SERVICE_SHA256.equals(serviceHash);
+    }
     static final long REFRESH_MS = 5000;
     interface Commands {
         void write(int transaction, int... values) throws Exception;

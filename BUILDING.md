@@ -20,6 +20,7 @@ the first build also downloads Android build dependencies.
 
 ```sh
 ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleDebug :app:assembleRelease
+python3 tools/test_ev6_scripts.py
 ```
 
 Debug uses Android's local debug signing key. On a ranchu/goldfish emulator, the
@@ -109,7 +110,9 @@ The service uses package id `paytondev.launchpad` and registry name
 `paytondev.launchpad/knobd`. It opens `com.paytondev.launchpad/.MainActivity`
 and passes the existing `from_knob` intent extra. It listens passively, without
 grabbing the input device or injecting events. Its profile expects device name
-`daudio_wp_daudioplus_neev23_us`, key code 17, and an 800 ms hold.
+`daudio_wp_daudioplus_neev23_us`, key code 17, and an 800 ms hold. On the exact
+EV6 US API 19 / 260507 identity, `knob.conf` selects
+`daudio_wp_daudioplus_cvev_us` with the same key and hold duration.
 
 Publish `Launchpad-install-usb.zip`, `paytondev.launchpad.zip` (for
 manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These

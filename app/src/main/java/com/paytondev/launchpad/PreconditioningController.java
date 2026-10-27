@@ -84,7 +84,7 @@ final class PreconditioningController {
             state = PreconditioningSnapshot.State.UNAVAILABLE; detail = unavailable;
         } else if (reading.enabled != 2) {
             state = PreconditioningSnapshot.State.UNAVAILABLE;
-            detail = "Enable battery conditioning in Hyundai’s settings first.";
+            detail = "Enable battery conditioning in the vehicle EV settings first.";
         } else if (reading.ready != 1) {
             state = PreconditioningSnapshot.State.UNAVAILABLE;
             detail = "The car has not reported READY.";

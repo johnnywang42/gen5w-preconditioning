@@ -12,7 +12,11 @@ this app was originally designed to be essentially a replacement for the stock h
 
 if you aren't comfortable modifying the infotainment system of your car, a [hardware mod](https://electroniqbuttons.com/products/ioniq-5-6-ev6-gv60-manual-preconditioning-button-beta-pre-order) exists that replicates this functionality in an easily reversible and safer manner.
 
-**compatibility:** so far this has only been checked on an **IONIQ 5 with the NEEV23 US head unit** (`wp_daudioplus_neev23_us`). Launchpad checks the car's firmware before it enables **Start**. On anything else, preconditioning stays **Unavailable** and the TUNE hold may not work. That's on purpose, so it never sends commands to firmware it doesn't understand. Details are in [COMPATIBILITY.md](COMPATIBILITY.md).
+**compatibility:** the app has exact firmware profiles for the **IONIQ 5 NEEV23 US head unit** (`wp_daudioplus_neev23_us`) and the **EV6 CVEV US head unit on software 260507** (`wp_daudioplus_cvev_us`). The EV6 profile was tested on a **US 2023 EV6 Wind RWD**. This does not establish support for every EV6 or firmware version. Launchpad checks the firmware before it enables **Start**; unsupported firmware stays **Unavailable**. Details and field-test limits are in [COMPATIBILITY.md](COMPATIBILITY.md).
+
+The EV6 changes are source contributions pending a maintainer release. Existing release downloads may not include them; check the release notes before installing.
+
+**EV6 owners:** start with the [EV6 installation and everyday-use guide](EV6-QUICK-START.md).
 
 **what you'll need:**
 - a computer (Mac, Windows or Linux)
@@ -269,6 +273,8 @@ these steps need ADB over Wi-Fi. in my testing, an iPhone hotspot is too modern 
 see [BUILDING.md](BUILDING.md). releases are built with `tools/build_apk.sh` and `tools/build_usb_bundles.py`.
 
 ## credits
+
+- EV6 development, documentation, and vehicle testing: [Abro86](https://github.com/Abro86), with development, documentation, and host-test assistance from OpenAI Codex.
 - [https://github.com/xwtk/hmg_nemesis](https://github.com/xwtk/hmg_nemesis) - the NEMESIS exploit that made this all possible
 - [https://github.com/tylerharvey/Ioniq5_CAN](https://github.com/tylerharvey/Ioniq5_CAN) - reverse engineered the CAN messages used to start preconditioning
 - [https://github.com/Helloyunho/gen5w-utils](https://github.com/Helloyunho/gen5w-utils) - other scripts and tools for reverse engineering Gen5W

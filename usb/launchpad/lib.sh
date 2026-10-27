@@ -46,7 +46,7 @@ verify_installed() {
     OK=0
     if pkg_installed; then say "ok: package $PKG_ID registered"
     else say "FAIL: package $PKG_ID not registered"; OK=1; fi
-    if [ -f "$SYSAPK" ] && same_file "$DEX" "$SYSAPK"; then say "ok: $SYSAPK matches the package APK"
+    if [ -f "$SYSAPK" ] && files_equal "$DEX" "$SYSAPK"; then say "ok: $SYSAPK matches the package APK"
     else say "FAIL: $SYSAPK missing or does not match $DEX"; OK=1; fi
     N=0
     STATE=$(knobd_state)
