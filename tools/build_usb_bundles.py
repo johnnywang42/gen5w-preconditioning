@@ -63,6 +63,9 @@ def main():
         copy_lf(ROOT / "tune-service/scripts/common.sh", scripts / "common.sh")
         copy_lf(ROOT / "usb/launchpad/lib.sh", scripts / "lib.sh")
         copy_lf(ROOT / f"usb/launchpad/{action}.sh", scripts / f"{action}.sh")
+        instructions = (ROOT / "usb/README-template.txt").read_text(encoding="utf-8")
+        (usb / "README.txt").write_bytes(
+            instructions.replace("@ACTION@", action).encode("utf-8"))
         if action != "uninstall":
             (usb / "packages").mkdir()
             shutil.copy2(package_zip, usb / f"packages/{PACKAGE_ID}.zip")

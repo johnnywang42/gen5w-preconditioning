@@ -21,11 +21,18 @@ the first build also downloads Android build dependencies.
 ```sh
 ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleDebug :app:assembleRelease
 python3 tools/test_ev6_scripts.py
+python3 tools/test_temperature_binder.py
+python3 tools/test_usb_bundles.py
 ```
 
 Debug uses Android's local debug signing key. On a ranchu/goldfish emulator, the
 debug vehicle client simulates a pending request; it never reports heating from
 a timer. Release uses the OEM client and rejects incompatible firmware.
+
+The temperature contract test uses `JAVA_HOME` or `java`/`javac` on PATH, compiles
+the real reader against small host Binder fixtures, and writes results under
+`build/temperature-contract/`. It never contacts a car. It does not substitute
+for Android service lifecycle or in-car verification.
 
 The unsigned release is at
 `app/build/outputs/apk/release/app-release-unsigned.apk`. Do not install it as a
@@ -82,6 +89,19 @@ Outputs in `dist/`:
   a copy of `tune-service/scripts/common.sh`). Install and update also carry
   `packages/paytondev.launchpad.zip`.
 
+Each USB ZIP also includes a plain-text `README.txt` with its action and log
+filename, installation steps and the known EV6 display limitation. The packaging
+test builds all three bundles in a temporary directory using a synthetic APK;
+it checks descriptor targets, exact contents, unchanged APK bytes and LF script
+endings, and rejects unsigned/missing-dex inputs. It also exercises the Windows
+and shell USB writers against temporary fixture drives, checking preservation
+of old instructions/OTA files and unrelated personal files. Each writer test
+requires its corresponding shell; unavailable shells are reported as skipped.
+It does not validate a real
+APK signature or installation on Android. The packager's signature-file check
+is only a structural check; use the signing verification in `build_apk.sh` for
+the actual release APK.
+
 `tools/usb/write-usb.sh` / `write-usb.ps1` write a bundle onto a drive. They
 move any previous NEMESIS files on it into a backup folder rather than deleting
 them.
@@ -120,4 +140,6 @@ manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These
 scripts generate local artifacts only and never connect to a car.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for firmware and verification limits.
+See [RELEASE-PREPARATION.md](RELEASE-PREPARATION.md) for release decisions,
+field-test limits and the installer/signing handoff.
 Icons retain the bundled [Phosphor license](app/src/main/assets/phosphor-LICENSE.txt).

@@ -21,7 +21,7 @@ command -v unzip >/dev/null || { echo "unzip is required" >&2; exit 1; }
 
 # Move (never delete) anything from a previous NEMESIS job out of the drive root.
 BACKUP=$DRIVE/NEMESIS-backup-$(date +%Y%m%d-%H%M%S)
-for ITEM in NEMESIS.data NEMESIS.sh launchpad packages; do
+for ITEM in NEMESIS.data NEMESIS.sh ota_package.tar README.txt launchpad packages; do
     if [ -e "$DRIVE/$ITEM" ]; then
         mkdir -p "$BACKUP"
         mv "$DRIVE/$ITEM" "$BACKUP/"
@@ -32,7 +32,7 @@ done
 unzip -q "$ZIP" -d "$DRIVE"
 sync
 echo "Wrote $(basename "$ZIP") to $DRIVE:"
-(cd "$DRIVE" && ls -1d NEMESIS.data launchpad packages 2>/dev/null) || true
+(cd "$DRIVE" && ls -1d README.txt NEMESIS.data launchpad packages 2>/dev/null) || true
 cat <<EOF
 
 Next:
