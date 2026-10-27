@@ -1,4 +1,4 @@
-# ioniq5-preconditioning
+# gen5w-preconditioning
 an app that gives you a manual preconditioning button in your IONIQ 5.
 
 hold the TUNE knob, press **Start**, and Launchpad asks the car to start conditioning the battery. no navigation destination needed.
@@ -17,6 +17,11 @@ if you aren't comfortable modifying the infotainment system of your car, a [hard
 The EV6 changes are source contributions pending a maintainer release. Existing release downloads may not include them; check the release notes before installing.
 
 **EV6 owners:** start with the [EV6 installation and everyday-use guide](EV6-QUICK-START.md).
+
+This follow-up contribution adds a battery-temperature display and warm-battery
+advisory for the exact EV6 profile, plus a five-minute unconfirmed-request timeout
+for both supported profiles. See [behavior and validation](TEMPERATURE-AND-TIMEOUT.md).
+These source changes are pending review and are not a new downloadable release.
 
 **what you'll need:**
 - a computer (Mac, Windows or Linux)
@@ -43,12 +48,13 @@ once that's done, delete `ota_package.tar` from the drive (or use a different dr
 
 ### 2. put the Launchpad installer on the drive
 
-download **`Launchpad-install-usb.zip`** from the [latest release](../../releases/latest).
+download **`Launchpad-install-usb.zip`** from the [releases page](../../releases) (the newest one is at the top).
 
 extract it so its **contents** sit at the **root** of the drive, with nothing else from NEMESIS left on it. the drive should look exactly like this:
 
 ```text
 USB drive/
+├── README.txt
 ├── NEMESIS.data
 ├── launchpad/
 │   ├── common.sh
@@ -69,12 +75,12 @@ USB drive/
 it does the same thing, and moves anything NEMESIS-related already on the drive into a `NEMESIS-backup-<date>` folder instead of overwriting it.
 
 ```sh
-sh tools/usb/write-usb.sh install /Volumes/YOUR_USB ~/Downloads
+sh tools/usb/write-usb.sh /Volumes/YOUR_USB ~/Downloads
 ```
 
 on Windows PowerShell:
 ```powershell
-.\tools\usb\write-usb.ps1 install E:\ $HOME\Downloads
+.\tools\usb\write-usb.ps1 E:\ $HOME\Downloads
 ```
 
 the last argument is the folder you downloaded the zip to.
@@ -93,34 +99,31 @@ the installer writes **`launchpad-install.log`** to the drive. if the dialog say
 
 reboot the headunit with the pinhole button and remove the drive. once it's back up, **hold the TUNE knob for about a second** and Launchpad should open.
 
-you only need the USB drive again to update or uninstall.
+you only need the USB drive again to update.
 
 ## using it
 
 1. hold TUNE to open Launchpad and go to preconditioning.
-2. press **Start**. Launchpad shows **Waiting for BMS** at first. activation usually takes **60–120 seconds**. that's a limitation of the car, nothing i can do about that unfortunately.
+2. press **Start**. On the supported EV6, a warm reading may show a ten-second advisory with **Start anyway**. Otherwise Launchpad shows **Request sent** until the car confirms activation. A request without confirmed activation is cancelled after five minutes; Start returns only after the car reports Off.
 3. the battery management system can still say no, because of temperature, charge, or other conditions it controls.
 
-**waiting does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active.
+**a request does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active. The five-minute pending timeout does not cut short an active session. Temperature display and the warm advisory are EV6-only; the shared timeout also applies to the Ioniq 5 profile.
 
 press **Stop** to cancel, including while it's still waiting. closing Launchpad does **not** stop a request that's already running.
 
 ## updating
 
-same as installing, but with **`Launchpad-update-usb.zip`** from the newest release (helper: `write-usb.sh update ...`). the log is `launchpad-update.log`. reboot afterwards.
+exactly the same as installing: put **`Launchpad-install-usb.zip`** from the newest release on the drive, run it, and reboot. when Launchpad is already installed, it updates it in place, and the log says so.
 
-your favorites and settings are kept. the update replaces the app in place instead of removing it first. it also works if you installed an older version with the old manual (ADB) instructions, or if nothing is installed yet.
-
-> [!NOTE]
-> if you plug in the **install** drive when Launchpad is already installed, it stops and tells you to use the update drive. running a drive twice is harmless.
+your favorites and settings are kept. the update replaces the app in place instead of removing it first. it also works if you installed an older version with the old manual (ADB) instructions. running the drive twice is harmless.
 
 ## uninstalling
 
 1. if preconditioning is running, press **Stop** and wait for it to end.
-2. same steps as installing, but with **`Launchpad-uninstall-usb.zip`** (helper: `write-usb.sh uninstall ...`). the log is `launchpad-uninstall.log`.
+2. open NEMESIS Manager (press NAV three times) → **Packages** → **Launchpad** → **Uninstall**. over ADB, `nemesis uninstall paytondev.launchpad` does the same.
 3. reboot the headunit.
 
-this removes Launchpad and its TUNE-hold service. it also works if you installed with the old manual instructions. NEMESIS stays installed. if you want that gone too, use **Wipe NEMESIS** in NEMESIS Manager. see the [NEMESIS docs](https://github.com/xwtk/hmg_nemesis/blob/main/03-Install-and-Uninstall.md#5-uninstall-wipe).
+this removes Launchpad, its TUNE-hold service and `/system/app/Launchpad.apk`. if you installed with the old manual instructions and Launchpad isn't in the Packages list, run the USB installer once first, then uninstall. NEMESIS stays installed. if you want that gone too, use **Wipe NEMESIS** in NEMESIS Manager. see the [NEMESIS docs](https://github.com/xwtk/hmg_nemesis/blob/main/03-Install-and-Uninstall.md#5-uninstall-wipe).
 
 ## troubleshooting
 
@@ -128,11 +131,11 @@ this removes Launchpad and its TUNE-hold service. it also works if you installed
 | --- | --- |
 | nothing happens when you plug in the drive | make sure `NEMESIS.data` is in the **root** of the drive, not in a folder. check the drive is FAT32/exFAT and in a data port. check NEMESIS is installed (press NAV three times; Manager should open). |
 | "Invalid package descriptor" | the files were edited or copied incompletely. extract the zip again onto the drive. |
-| the dialog says it failed | open `launchpad-<install/update/uninstall>.log` on the drive. for more detail, open NEMESIS Manager → **Logs** → **Copy to USB**, which writes a `NEMESIS-logs` folder to the drive. |
+| the dialog says it failed | open `launchpad-install.log` on the drive. for more detail, open NEMESIS Manager → **Logs** → **Copy to USB**, which writes a `NEMESIS-logs` folder to the drive. |
 | "not enough space on /system" in the log | nothing was changed. message me with the log. |
 | holding TUNE doesn't open Launchpad | reboot once more. in NEMESIS Manager → **Services**, `paytondev.launchpad/knobd` should be running. a different headunit may need a different TUNE profile; message me. |
 | preconditioning says **Unavailable** | your firmware doesn't match the checked profile, so Launchpad won't send commands. see [COMPATIBILITY.md](COMPATIBILITY.md). |
-| it says **Waiting for BMS** forever | the car hasn't accepted the request. it can refuse because of temperature, charge, or other conditions. press **Stop** and try again later. |
+| it stays **Request sent** | activation is unconfirmed. press **Stop**, or allow the five-minute pending timeout to request cancellation. The app waits for Off before offering Start again. |
 
 ## what this changes on your car
 

@@ -4,17 +4,23 @@ import java.util.Locale;
 
 /** Immutable UI state. A pending request and the vehicle indicator are independent. */
 final class PreconditioningSnapshot {
-    enum State { CHECKING, UNAVAILABLE, IDLE, WAITING, ACTIVE, STOPPING, ENDED, UNKNOWN, ERROR }
+    enum State { CHECKING, UNAVAILABLE, IDLE, WARM, WAITING, ACTIVE, STOPPING, ENDED, TIMED_OUT, UNKNOWN, ERROR }
     final State state;
     final boolean requested, canStart, canStop;
     final int indicator, failureRaw;
     final long elapsedMs;
+    final long resetSeconds;
     final String detail;
     PreconditioningSnapshot(State state, boolean requested, boolean canStart, boolean canStop,
                             int indicator, int failureRaw, long elapsedMs, String detail) {
+        this(state, requested, canStart, canStop, indicator, failureRaw, elapsedMs, detail, 0);
+    }
+    PreconditioningSnapshot(State state, boolean requested, boolean canStart, boolean canStop,
+                            int indicator, int failureRaw, long elapsedMs, String detail, long resetSeconds) {
         this.state = state; this.requested = requested; this.canStart = canStart;
         this.canStop = canStop; this.indicator = indicator; this.failureRaw = failureRaw;
         this.elapsedMs = elapsedMs; this.detail = detail;
+        this.resetSeconds = resetSeconds;
     }
     static PreconditioningSnapshot checking() {
         return new PreconditioningSnapshot(State.CHECKING, false, false, false, -1, -1, 0,
@@ -25,10 +31,12 @@ final class PreconditioningSnapshot {
             case CHECKING: return "Checking";
             case UNAVAILABLE: return "Unavailable";
             case IDLE: return indicator == 1 ? "Active · car controlled" : "Ready";
-            case WAITING: return "Waiting for BMS";
+            case WARM: return "Battery warm · resets in " + resetSeconds + "s";
+            case WAITING: return "Request sent";
             case ACTIVE: return "Active";
             case STOPPING: return "Stop requested";
             case ENDED: return "Session ended";
+            case TIMED_OUT: return "No activation";
             case UNKNOWN: return "Status unknown";
             default: return "Request error";
         }

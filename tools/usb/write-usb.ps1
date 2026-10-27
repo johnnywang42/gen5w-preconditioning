@@ -1,15 +1,15 @@
 # Write a Launchpad USB bundle onto a FAT32/exFAT drive. Runs on your computer;
 # does not connect to the car.
-#   .\tools\usb\write-usb.ps1 install|update|uninstall E:\ [bundle-dir]
-# bundle-dir holds Launchpad-<action>-usb.zip (default: .\dist, then the current dir).
+#   .\tools\usb\write-usb.ps1 E:\ [bundle-dir]
+# bundle-dir holds Launchpad-install-usb.zip (default: .\dist, then the current dir).
+# The same drive installs or updates Launchpad.
 param(
-    [Parameter(Mandatory = $true)][ValidateSet('install', 'update', 'uninstall')][string]$Action,
     [Parameter(Mandatory = $true)][string]$Drive,
     [string]$BundleDir
 )
 $ErrorActionPreference = 'Stop'
 
-$name = "Launchpad-$Action-usb.zip"
+$name = 'Launchpad-install-usb.zip'
 $candidates = @($BundleDir, (Join-Path $PSScriptRoot '..\..\dist'), 'dist', '.') | Where-Object { $_ }
 $zip = $candidates | ForEach-Object { Join-Path $_ $name } | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
 if (-not $zip) { throw "$name not found; pass the folder you downloaded it to." }
@@ -17,7 +17,7 @@ if (-not (Test-Path -LiteralPath $Drive -PathType Container)) { throw "$Drive is
 
 # Move (never delete) anything from a previous NEMESIS job out of the drive root.
 $backup = Join-Path $Drive ("NEMESIS-backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'launchpad', 'packages') {
+foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'ota_package.tar', 'README.txt', 'launchpad', 'packages') {
     $path = Join-Path $Drive $item
     if (Test-Path -LiteralPath $path) {
         New-Item -ItemType Directory -Force -Path $backup | Out-Null
@@ -29,12 +29,12 @@ foreach ($item in 'NEMESIS.data', 'NEMESIS.sh', 'launchpad', 'packages') {
 # Expand-Archive copies bytes as-is, so the scripts keep their LF line endings.
 Expand-Archive -LiteralPath $zip -DestinationPath $Drive
 Write-Host "Wrote $name to $Drive"
-Get-ChildItem -LiteralPath $Drive -Name | Where-Object { $_ -in 'NEMESIS.data', 'launchpad', 'packages' }
+Get-ChildItem -LiteralPath $Drive -Name | Where-Object { $_ -in 'README.txt', 'NEMESIS.data', 'launchpad', 'packages' }
 Write-Host @"
 
 Next:
   1. Eject the drive, insert it into the car's USB data port (car on, parked).
   2. Tap Yes on the NEMESIS prompt and wait for the result dialog.
   3. Reboot the head unit (pinhole button), then remove the drive.
-  The log is written to launchpad-$Action.log on the drive.
+  The log is written to launchpad-install.log on the drive.
 "@

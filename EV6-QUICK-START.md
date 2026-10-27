@@ -2,8 +2,9 @@
 
 **Release status:** these instructions accompany an EV6 contribution under
 review. Wait for a maintainer release whose notes explicitly include EV6 US
-260507 support. The existing release downloads may not contain it. This branch
-does not provide a new signed installer.
+260507 support and the temperature/timeout improvements described here. The
+existing release downloads may not contain them. This branch does not provide
+a new signed installer.
 
 ## Check your car first
 
@@ -45,16 +46,19 @@ Launchpad after installation. These are separate shortcuts.
 
 1. From the maintainer's [release page](https://github.com/paytondevs/ioniq5-preconditioning/releases),
    choose a release explicitly listing EV6 US 260507 support.
-2. Download **`Launchpad-install-usb.zip`** for a first installation. If Launchpad
-   is already installed, read **Updating** below first.
+2. Download **`Launchpad-install-usb.zip`**. The same drive installs Launchpad
+   or updates an existing installation; read **Updating** below first if
+   Launchpad is already installed.
 3. Use an empty drive, or back up its contents to your computer. Move any old
-   `NEMESIS.data`, `NEMESIS.sh`, and `ota_package.tar` off the drive.
+   `NEMESIS.data`, `NEMESIS.sh`, `ota_package.tar`, `README.txt`, `launchpad`, and
+   `packages` items off the drive before copying a new bundle.
 4. Extract the ZIP. Copy the **contents** of its folder onto the drive, rather
    than copying the folder itself. Do not extract the inner package ZIP.
 5. Check that you can see this layout immediately when you open the drive:
 
 ```text
 USB drive/
+  README.txt
   NEMESIS.data
   launchpad/
     common.sh
@@ -92,7 +96,7 @@ You do not need to leave the USB plugged in.
 2. For the first check, keep the car parked in READY with **no active Kia
    navigation route**. You do not need to select a charger in Kia navigation.
 3. Hold **TUNE** to open Launchpad. Tap **Start** beside Preconditioning.
-4. **Waiting for BMS** means the request was sent; it does not mean heating has
+4. **Request sent** means the request was sent; it does not mean heating has
    started. **Active** means the car reports conditioning active. Activation is
    not guaranteed: the car decides whether temperature, charge, and other
    conditions allow it.
@@ -102,38 +106,90 @@ You do not need to leave the USB plugged in.
 
 Holding TUNE opens the app; it does not start heating. Closing the app or
 returning to Android Auto does **not** stop an active manual request. Use Stop.
-If it keeps waiting, you can stop the request and try again when needed. This
-initial contribution does not include the later temperature display or automatic
-waiting timeout from the local development build.
+You can stop a waiting request yourself at any time. The app also requests
+cancellation after five minutes without confirmed activation, as explained below.
+
+## Reading the temperature
+
+- **Home:** `Battery temp: 61°F` is the lowest reported battery-pack sensor
+  temperature, not the outside temperature or the average of all sensors.
+- **Advanced:** `Lowest Battery Pack Temperature: 61°F (16°C)` shows both units
+  and how many seconds ago the app received the response.
+- While Launchpad is open, it asks for a reading roughly every ten seconds. The
+  **received ...s ago** counter should reset after successful responses. The
+  temperature does not need to change each time. In the field test, the owner
+  saw a rise after a little over five minutes of conditioning.
+- **Checking** means the first read is pending. **Unavailable** means no usable
+  reading was obtained. **Stale** means the last reading is old or a refresh
+  failed; do not treat it as current. Advanced retains the old value and its age.
+
+Temperature polling is intended to stop when you leave Launchpad and resume
+when you reopen it. A known issue can leave the reading stale after returning
+during an active session. If this happens, leave and reopen Launchpad again;
+this restored updates in the reported test after conditioning ended. It does
+not confirm the current temperature or stop an active request. Use **Stop**
+when you want to cancel conditioning.
+
+Reading the temperature does not turn heating on. The incoming value uses
+whole degrees Celsius, so Fahrenheit readings can move in steps. The response
+age tells you when the app received data, not exactly when the car sampled it.
+
+## If the battery is already warm
+
+When you tap **Start**, the app requests a temperature reading. At **68°F / 20°C
+or above**, it shows **Battery warm** with a ten-second countdown instead of
+sending a conditioning request. If the car remains READY, enabled, and Off,
+the button returns to **Start** when the countdown ends. You can simply leave
+the notice alone; no heating request has been sent.
+
+If you still want to request conditioning, tap the separate **Start anyway**
+button during the notice. The car still decides whether to activate. This is
+an advisory based on an expected heating threshold, not a confirmed BMS refusal
+reason or a guarantee of charging speed. An unavailable temperature reading
+does not block a normal manual request.
+
+## If the car never confirms activation
+
+After five minutes without an **Active** response, the app sends cancellation
+and waits for a fresh **Off** response before restoring Start. It then shows
+**No activation**. An already-active session is not stopped by this five-minute
+timer. A timeout does not prove the battery was warm.
+
+This timeout has automated test coverage but has not yet been observed in the
+car. The reported stop near 70°F occurred after Active and may have been a
+temperature-based stop; it does not establish a fixed cutoff or verify the timeout.
+
+If cancellation fails, the app keeps the session unresolved and leaves **Stop**
+available to retry. If cancellation was sent but Off has not been confirmed,
+it continues waiting instead of claiming success. Keep the logs if this happens.
 
 ## Updating
 
-Use **`Launchpad-update-usb.zip`** from the same maintainer's release series and
-follow the installation steps above, starting with stopping any pending or
-active session. Its USB layout has `update.sh` instead of `install.sh`. Update
-logs are named **`launchpad-update.log`**.
-
-If you installed a developer-signed or independently built APK, do not assume
-the maintainer's updater can replace it. Ask for a migration plan first; the
-signing certificates may differ. Do not clear app data to force an update.
+Use **`Launchpad-install-usb.zip`** from a newer release and follow the
+installation steps above, starting with stopping any pending or active session.
+When Launchpad is already installed, the installer updates it in place and keeps
+its settings; `launchpad-install.log` says it updated. Do not clear app data to
+force an update.
 
 ## Removing Launchpad
 
-Stop any pending or active session and confirm **Off**. Use the maintainer's
-**`Launchpad-uninstall-usb.zip`**, accept the USB prompt, wait for success, then
-remove the drive and restart infotainment. This removes Launchpad and its TUNE
-service; it leaves NEMESIS installed. Its layout has `uninstall.sh` and no
-`packages` folder. Keep `launchpad-uninstall.log` if anything fails.
+Stop any pending or active session and confirm **Off**. Open NEMESIS Manager,
+then **Packages -> Launchpad -> Uninstall**, and restart infotainment. This
+removes Launchpad, its TUNE service and `/system/app/Launchpad.apk`; it leaves
+NEMESIS installed. If it fails, use **Logs -> Copy to USB** and keep
+`NEMESIS-logs`.
 
 ## If something goes wrong
 
 | What you see | What to do |
 | --- | --- |
 | Only "No supported files" and no NEMESIS prompt | Check NEMESIS is installed, the drive uses a data port, and `NEMESIS.data` is at the drive's top level. The media-player message alone does not diagnose NEMESIS. |
-| Install/update reports failure | Keep the USB inserted. Open NEMESIS Manager, then **Logs -> Copy to USB**. Bring it back to the computer and keep `launchpad-install.log` (or the update/uninstall equivalent) and `NEMESIS-logs`. |
+| Install/update reports failure | Keep the USB inserted. Open NEMESIS Manager, then **Logs -> Copy to USB**. Bring it back to the computer and keep `launchpad-install.log` and `NEMESIS-logs`. |
 | Holding TUNE does nothing | Confirm you restarted infotainment after installation. In NEMESIS **Services**, check `paytondev.launchpad/knobd`. Report its status along with your software version. |
 | Preconditioning is Unavailable | Read the reason shown in Advanced. Confirm READY and Battery conditioning mode; a firmware mismatch needs investigation, not disabled compatibility checks. |
-| It stays Waiting for BMS | The car has not confirmed activation. Tap Stop; do not assume the battery is warm solely from this message. |
+| It stays Request sent | The car has not confirmed activation. Tap Stop, or let the five-minute pending timeout request cancellation. Do not assume warmth from this message. |
+| Battery warm appears | No request was sent. Let the ten-second notice reset, or explicitly choose Start anyway. |
+| Battery temp is stale/unavailable | Check Advanced for the response age and retry by leaving and reopening Launchpad. A missing reading is not zero degrees and does not establish that the battery is warm. |
 
 When reporting a problem, include the model/year/market, full software version,
 release name, steps taken, and the relevant error. Review logs before posting
