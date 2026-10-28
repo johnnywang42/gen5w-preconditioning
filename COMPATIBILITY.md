@@ -4,16 +4,16 @@
 
 Launchpad only works on the exact cars and head-unit software versions below. Your head unit's **software version** is what decides it, not the model year.
 
-| vehicle | market | head unit | software version | status | tested on |
+| vehicle | model years | market | head unit | software version | status |
 | --- | --- | --- | --- | --- | --- |
-| Hyundai IONIQ 5 | US | NEEV23 (`wp_daudioplus_neev23_us`) | matching firmware files | ✅ supported | model year unconfirmed |
-| Hyundai IONIQ 5 | US | NEEV (`wp_daudioplus_neev_us`) | `NEEV.USA.0000.V015.012.260507` | ✅ supported | 2022 IONIQ 5 SE AWD |
-| Kia EV6 | US | CVEV (`wp_daudioplus_cvev_us`) | `CVEV.USA.0000.V015.012.260507` | ✅ supported (pending release) | 2023 EV6 Wind RWD |
+| Hyundai IONIQ 5 | 2022–2023 | US | NEEV (`wp_daudioplus_neev_us`) | `NEEV.USA.0000.V015.012.260507` | ✅ supported |
+| Hyundai IONIQ 5 | 2022–2023 | US | NEEV23 (`wp_daudioplus_neev23_us`) | matching firmware files | ✅ supported |
+| Kia EV6 | 2023 | US | CVEV (`wp_daudioplus_cvev_us`) | `CVEV.USA.0000.V015.012.260507` | ✅ supported |
 
-- **Similar cars with the same software** (for example other model years) will probably work, but haven't been tested.
+- **Other model years with the same head unit and software** will probably work, but haven't been tested.
 - **Older and newer software versions aren't supported yet.** Support for the newest software is being worked on.
 - **On an unsupported car, nothing bad happens.** Launchpad checks the car before it enables **Start**. If it doesn't match a row above, preconditioning shows **Unavailable** and Launchpad never sends anything to the car.
-- **EV6 support** is in the source but may not be in the latest download yet; check the release notes. EV6 owners can follow the [EV6 guide](EV6-QUICK-START.md).
+- **EV6 owners** can follow the [EV6 guide](EV6-QUICK-START.md).
 
 ## car not listed? run the vehicle porting kit
 
