@@ -129,10 +129,12 @@ scripts are toolbox-only `#!/system/bin/sh` (KitKat mksh: no `grep`, `awk`,
 The service uses package id `paytondev.launchpad` and registry name
 `paytondev.launchpad/knobd`. It opens `com.paytondev.launchpad/.MainActivity`
 and passes the existing `from_knob` intent extra. It listens passively, without
-grabbing the input device or injecting events. Its profile expects device name
+grabbing the input device or injecting events. Its default profile expects the NEEV23 US (Ioniq 5) device name
 `daudio_wp_daudioplus_neev23_us`, key code 17, and an 800 ms hold. On the exact
 EV6 US API 19 / 260507 identity, `knob.conf` selects
-`daudio_wp_daudioplus_cvev_us` with the same key and hold duration.
+`daudio_wp_daudioplus_cvev_us` with the same key and hold duration, and on the
+exact NEEV US (Ioniq 5) API 19 / 260507 identity it selects
+`daudio_wp_daudioplus_neev_us`.
 
 Publish `Launchpad-install-usb.zip`, `paytondev.launchpad.zip` (for
 manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These

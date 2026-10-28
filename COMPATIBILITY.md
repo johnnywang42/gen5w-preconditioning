@@ -1,7 +1,12 @@
 # V1 compatibility and verification
 
-The original Ioniq 5 preconditioning profile targets `wp_daudioplus_neev23_us` on
-Android 4.4/API 19. It validates these firmware files before enabling Start:
+Two Ioniq 5 head units are supported, identified by their device codes:
+`wp_daudioplus_neev23_us` (NEEV23 US) and `wp_daudioplus_neev_us` (NEEV US,
+below). The NEEV23 US model year is unconfirmed; the NEEV US profile was
+verified on a US 2022 Ioniq 5 SE AWD.
+
+The NEEV23 US profile, the first one in this project, targets
+`wp_daudioplus_neev23_us` on Android 4.4/API 19. It validates these firmware files before enabling Start:
 
 | File | SHA-256 |
 | --- | --- |
@@ -13,6 +18,46 @@ It checks HEV service `com.hkmc.micom.hev` / descriptor
 `com.hkmc.bcm.IBCMService`. An incompatible or unreadable interface leaves the
 feature unavailable. Do not remove these checks to support another firmware;
 establish its command and feedback profile first.
+
+## NEEV US 260507 profile
+
+Verified vehicle: **US 2022 Hyundai Ioniq 5 SE AWD**.
+
+The additional profile requires Android API 19, device `wp_daudioplus_neev_us`,
+and `ro.build.product=NEEV.USA.0000.V015.012.260507` (build `KVT49L`). A
+read-only USB capture on 2026-10-27 found both framework files byte-identical to
+the NEEV23 US profile, so it requires those same two fingerprints above.
+`com.hkmc.micom.hev` / `com.hkmc.hev.IHEVService` and `com.hkmc.micom.bcm` /
+`com.hkmc.bcm.IBCMService` were both present. No command or enum remapping was
+made.
+
+Holding TUNE was verified on that car on 2026-10-27: key 17 arrives on the main
+`daudio_wp_daudioplus_neev_us` input device (not its `_can` or `_knob`
+devices), so `knob.conf` selects that name on the exact NEEV US identity with
+the original 800 ms hold.
+
+Field testing on that car repeated the EV6 physical tests below, parked with no
+active navigation route, using a local build of this profile signed with a
+personal key:
+
+- The installed app observed Off -> Active -> Off using the existing command
+  arguments and feedback mapping, first on 2026-10-27.
+- The owner confirmed app Start/Stop and Ready after an infotainment restart
+  following Stop. A cool-battery morning test also activated.
+- Holding TUNE opened Launchpad after reboot. Recorded input was key 17 on
+  `daudio_wp_daudioplus_neev_us`; holding TUNE opens the screen and does not
+  issue Start.
+
+Matching framework files show the Binder interface is the same code; they do not
+prove the vehicle MICOM/BMS behind it responds identically on other cars. The
+same items left unverified on the EV6 (driving activation, navigation
+interaction, active-session power loss, and a public release cycle) remain
+unverified here. No firmware, raw logs, or disassembly are included.
+
+**Other model years:** other US-market Ioniq 5 vehicles reporting this exact
+device, software version, and both firmware fingerprints may also be
+compatible, but have not been tested beyond the verified **US 2022 Ioniq 5 SE AWD**.
+Model year alone does not establish compatibility.
 
 ## EV6 US 260507 profile
 
@@ -32,7 +77,7 @@ and `ro.build.product=CVEV.USA.0000.V015.012.260507`, plus both fingerprints:
 | `/system/framework/automotive-service.odex` | `8af745b41aa28f490953d61531215cd94e059f104b31f6236a8f6c7af23b8062` |
 
 The property is read directly: Android `Build.PRODUCT` exposes a different
-property. The original Ioniq 5 checks remain unchanged. Neither profile accepts
+property. The NEEV23 US checks remain unchanged. Neither profile accepts
 the other profile's hashes. The HEV/BCM descriptors are checked for both.
 
 Field testing on October 24-25, 2026 used a US 2023 Kia EV6 Wind RWD, Gen5W
@@ -107,5 +152,5 @@ The source includes unit tests for the request/feedback distinction, cancellatio
 communication failures, recovery, navigation between app pages, favorites,
 connection formatting, and TUNE event parsing/hold detection. Emulator tests
 and static profile derivation do not establish real battery heating. At source
-publication, the original Ioniq 5 profile had not been verified in a parked car
+publication, the NEEV23 US profile had not been verified in a parked car
 in this workspace. The later EV6 field observations are scoped separately above.
