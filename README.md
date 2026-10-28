@@ -136,6 +136,7 @@ this removes Launchpad, its TUNE-hold service and `/system/app/Launchpad.apk`. i
 | holding TUNE doesn't open Launchpad | reboot once more. in NEMESIS Manager → **Services**, `paytondev.launchpad/knobd` should be running. a different headunit may need a different TUNE profile; message me. |
 | preconditioning says **Unavailable** | your firmware doesn't match the checked profile, so Launchpad won't send commands. see [COMPATIBILITY.md](COMPATIBILITY.md). |
 | it stays **Request sent** | activation is unconfirmed. press **Stop**, or allow the five-minute pending timeout to request cancellation. The app waits for Off before offering Start again. |
+| your vehicle appears to be supported, but you're still seeing **Unavailable** | check your software version. right now Launchpad is compatible only with 260507. older firmware versions aren't compatible, and we're working on support for the newest firmware that released this week. |
 
 ## what this changes on your car
 
