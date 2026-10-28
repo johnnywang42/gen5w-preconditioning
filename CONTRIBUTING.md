@@ -20,7 +20,18 @@ don't edit the version anywhere else. the app, the NEMESIS package and the relea
 
 ## vehicle ports
 
-a vehicle port adds a new car or head unit, usually a new profile in `PreconditioningProfile.java`, a TUNE entry in `tune-service/knob.conf`, and a section in [COMPATIBILITY.md](COMPATIBILITY.md).
+a vehicle port adds a new car or head unit, usually a new profile in `PreconditioningProfile.java`, a TUNE entry in `tune-service/knob.conf`, a row in the [compatibility chart](COMPATIBILITY.md#compatibility-chart) and a section under its technical details.
+
+**start from a porting kit report.** the [vehicle porting kit](COMPATIBILITY.md#car-not-listed-run-the-vehicle-porting-kit) USB collects what a port needs, read-only, into `launchpad-port-report.txt`, and owners send it in with a **Vehicle port request** issue. the report has:
+
+- `[identity]`: SDK, `ro.product.device`, `ro.build.product` and the other build properties
+- `[existing_profile]`: whether an existing profile already accepts the car
+- `[firmware]`: SHA-256 of `automotive.odex`, `automotive-service.odex` and other `automotive*` framework files
+- `[services]` / `[service_descriptors]`: whether `com.hkmc.micom.hev` and `com.hkmc.micom.bcm` exist and their interface descriptors
+- `[interfaces]`: every `TRANSACTION_*` code and interface constant of the `com.hkmc.*` services, read from the car's own framework by reflection. compare them with an existing profile to see whether commands need remapping.
+- `[input]` / `[key_capture]`: the input devices and, if the owner held TUNE, which device and key code it sent (`likely_knob`)
+
+if the firmware hashes match an existing profile, the Binder interface is the same code. if they differ, the transaction tables show whether the existing command profile still lines up, but you still have to confirm Start/Stop in the car.
 
 **please include a demonstration that it works on the vehicle.** a video is best. it should show:
 

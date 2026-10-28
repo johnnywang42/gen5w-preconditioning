@@ -58,8 +58,9 @@ class UsbBundleTest(unittest.TestCase):
             self.assertIn("\nversion=4.5.6\n", descriptor)
             self.assertNotIn("@VERSION@", descriptor)
         # One bundle installs or updates; uninstall is NEMESIS Manager's button.
+        # The other is the read-only porting kit.
         self.assertEqual(sorted(p.name for p in (self.root / "dist").glob("Launchpad-*-usb.zip")),
-                         ["Launchpad-install-usb.zip"])
+                         ["Launchpad-install-usb.zip", "Launchpad-port-kit-usb.zip"])
         with zipfile.ZipFile(self.root / "dist/Launchpad-install-usb.zip") as bundle:
             expected = {"README.txt", "NEMESIS.data", "launchpad/common.sh",
                         "launchpad/lib.sh", "launchpad/install.sh",
@@ -73,6 +74,41 @@ class UsbBundleTest(unittest.TestCase):
             self.assertIn("launchpad-install.log", readme)
             for name in expected - {"packages/paytondev.launchpad.zip"}:
                 self.assertNotIn(b"\r", bundle.read(name), name)
+
+    def test_port_kit_reads_only_and_carries_the_same_apk(self):
+        source = self.root / "usb/port-kit/collect.sh"
+        source.write_bytes(source.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+        result = self.build({"classes.dex": b"fixture-not-dex", "META-INF/TEST.RSA": b"not-a-signature"})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        with zipfile.ZipFile(self.root / "dist/Launchpad-port-kit-usb.zip") as kit:
+            expected = {"README.txt", "NEMESIS.data", "launchpad-port/collect.sh",
+                        "launchpad-port/common.sh", "launchpad-port/lib.sh",
+                        "launchpad-port/Launchpad.apk"}
+            # No packages/ folder: the kit has nothing NEMESIS could install.
+            self.assertEqual(set(kit.namelist()), expected)
+            self.assertEqual(kit.read("launchpad-port/Launchpad.apk"), self.apk.read_bytes())
+            self.assertEqual(kit.read("NEMESIS.data").decode(),
+                             "[nemesis]\nversion=1.0\ntype=execute\npath=launchpad-port/collect.sh\n")
+            collect = kit.read("launchpad-port/collect.sh").decode()
+            self.assertIn("\nKIT_VERSION=4.5.6\n", collect)
+            self.assertNotIn("@VERSION@", collect)
+            for word in ('"$NEMESIS" install', "remount rw", "system_rw", "/system/app"):
+                self.assertNotIn(word, collect)
+            self.assertEqual(kit.read("launchpad-port/common.sh"),
+                             (self.root / "tune-service/scripts/common.sh").read_bytes().replace(b"\r\n", b"\n"))
+            readme = kit.read("README.txt").decode("utf-8")
+            self.assertIn("vehicle porting kit", readme)
+            self.assertIn("launchpad-port-report.txt", readme)
+            self.assertIn("template=vehicle-port.yml", readme)
+            for name in expected - {"launchpad-port/Launchpad.apk"}:
+                self.assertNotIn(b"\r", kit.read(name), name)
+
+    def test_reject_port_kit_without_version_placeholder(self):
+        source = self.root / "usb/port-kit/collect.sh"
+        source.write_text(source.read_text().replace("KIT_VERSION=@VERSION@", "KIT_VERSION=1"), newline="\n")
+        result = self.build({"classes.dex": b"fixture-not-dex", "META-INF/TEST.RSA": b"not-a-signature"})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("KIT_VERSION=@VERSION@", result.stderr)
 
     def test_reject_unsigned_input_before_creating_bundles(self):
         result = self.build({"classes.dex": b"fixture-not-dex"})
