@@ -22,6 +22,13 @@ def require_signed(apk):
     if not any(n.startswith("META-INF/") and n.upper().endswith((".RSA", ".DSA", ".EC")) for n in names):
         raise SystemExit(f"{apk} is not signed; build it with tools/build_apk.sh (it goes into /system/app)")
 
+def read_version():
+    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    parts = version.split(".")
+    if len(parts) != 3 or not all(p.isdigit() for p in parts):
+        raise SystemExit(f"VERSION must be major.minor.patch, got {version!r}")
+    return version
+
 def copy_lf(source, destination):
     # Car-side scripts run under KitKat mksh; never ship CRLF.
     destination.write_bytes(source.read_bytes().replace(b"\r\n", b"\n"))
@@ -35,6 +42,7 @@ def main():
     if not apk.is_file():
         raise SystemExit(f"Missing {apk}. Run tools/build_apk.sh first, or pass --apk.")
     require_signed(apk)
+    version = read_version()
 
     # Work only in this repository's generated build directory.
     stage = ROOT / "build/usb-bundles"
@@ -47,6 +55,12 @@ def main():
             target = package / path.relative_to(ROOT / "tune-service")
             target.parent.mkdir(parents=True, exist_ok=True)
             copy_lf(path, target)
+    # The package version comes from /VERSION, like the APK's versionName.
+    descriptor = package / "NEMESIS.data"
+    text = descriptor.read_text(encoding="utf-8")
+    if text.count("version=@VERSION@\n") != 1:
+        raise SystemExit("tune-service/NEMESIS.data needs exactly one version=@VERSION@ line")
+    descriptor.write_bytes(text.replace("@VERSION@", version).encode("utf-8"))
     (package / "app").mkdir()
     shutil.copy2(apk, package / "app/Launchpad.apk")
 

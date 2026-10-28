@@ -29,6 +29,7 @@ class UsbBundleTest(unittest.TestCase):
                 shutil.copytree(ROOT / folder / "usb", self.root / folder / "usb")
             else:
                 shutil.copytree(ROOT / folder, self.root / folder)
+        (self.root / "VERSION").write_text("4.5.6\n", encoding="utf-8")
         self.apk = self.root / "fixture.apk"
 
     def build(self, entries):
@@ -53,6 +54,9 @@ class UsbBundleTest(unittest.TestCase):
             self.assertEqual(set(package.namelist()), expected | {"app/Launchpad.apk"})
             for name in expected:
                 self.assertNotIn(b"\r", package.read(name), name)
+            descriptor = package.read("NEMESIS.data").decode()
+            self.assertIn("\nversion=4.5.6\n", descriptor)
+            self.assertNotIn("@VERSION@", descriptor)
         # One bundle installs or updates; uninstall is NEMESIS Manager's button.
         self.assertEqual(sorted(p.name for p in (self.root / "dist").glob("Launchpad-*-usb.zip")),
                          ["Launchpad-install-usb.zip"])
@@ -74,6 +78,13 @@ class UsbBundleTest(unittest.TestCase):
         result = self.build({"classes.dex": b"fixture-not-dex"})
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("is not signed", result.stderr)
+        self.assertFalse((self.root / "dist").exists())
+
+    def test_reject_malformed_version(self):
+        (self.root / "VERSION").write_text("1.3\n", encoding="utf-8")
+        result = self.build({"classes.dex": b"fixture-not-dex", "META-INF/TEST.RSA": b"not-a-signature"})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("VERSION must be major.minor.patch", result.stderr)
         self.assertFalse((self.root / "dist").exists())
 
     def test_reject_input_without_dex(self):
