@@ -8,8 +8,8 @@ the version lives in one place: the [`VERSION`](VERSION) file at the root of the
 
 | what you changed | bump | example |
 | --- | --- | --- |
-| bug fix | **+0.0.1** | `1.2.0` → `1.2.1` |
-| vehicle port | **+0.1** (and reset the last number) | `1.2.3` → `1.3.0` |
+| bug fix | **+0.0.1** | `1.3.0` → `1.3.1` |
+| vehicle port | **+0.1** (and reset the last number) | `1.3.2` → `1.4.0` |
 | docs, CI or other changes the car never sees | none | |
 
 if your change doesn't fit, pick what seems right and say so in the PR. i'll sort it out.

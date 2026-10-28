@@ -2,9 +2,9 @@
 
 Status: source contribution for maintainer review; not a published binary release.
 The compatibility contribution is PR #2 and temperature/timeout follow-up is PR #3.
-The follow-up depends on the compatibility changes. Public app numbering remains
-1.2.0 in this branch; the maintainer selects the release version in `VERSION`
-before publishing (the version code follows from it). Personal ev6.* build numbers are
+The follow-up depends on the compatibility changes. `VERSION` is now 1.3.0,
+covering the later NEEV US vehicle port (PR #7); the maintainer selects the
+release version there before publishing (the version code follows from it). Personal ev6.* build numbers are
 not the proposed public release sequence.
 
 ## What owners can expect
