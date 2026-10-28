@@ -1,9 +1,16 @@
 # Building Launchpad and the TUNE-knob service
 
-The Android project builds Launchpad 1.2.0 (version code 3), package
+The Android project builds Launchpad, package
 `com.paytondev.launchpad`, for Android 4.4/API 19. The TUNE daemon source is in
 `app/src/main/java/com/paytondev/launchpad/knob/`; its NEMESIS scripts and input
 profile are in `tune-service/`.
+
+The release version is the single line in [`VERSION`](VERSION), e.g. `1.3.0`.
+Gradle uses it as `versionName` and derives `versionCode` as
+`major * 10000 + minor * 100 + patch` (so minor and patch stay below 100).
+`tools/build_usb_bundles.py` writes it into the packaged `NEMESIS.data`, whose
+source keeps a `version=@VERSION@` placeholder, and CI tags the draft release
+`v<VERSION>`. Don't edit the version anywhere else.
 
 ## Requirements
 
@@ -148,14 +155,13 @@ scripts generate local artifacts only and never connect to a car.
 - **Merges to `main`** (or a manual run on `main`): generates a throwaway
   signing key, runs `tools/build_apk.sh` with it, then
   `tools/build_usb_bundles.py`, then `SHA256SUMS.txt`. The files are kept as a
-  workflow artifact and uploaded to the draft release `v<versionName>`. There is
+  workflow artifact and uploaded to the draft release `v<VERSION>`. There is
   one draft per version: each merge retargets it to the new commit and replaces
   its assets, leaving the notes alone. Publishing creates the tag.
 
-Once `v<versionName>` is published, later merges only produce the workflow
-artifact. To start the next draft, bump `versionName`/`versionCode` in
-`app/build.gradle.kts` and `version=` in `tune-service/NEMESIS.data`; the job
-fails if the two versions differ. The workflow needs no secrets.
+Once `v<VERSION>` is published, later merges only produce the workflow
+artifact. To start the next draft, change `VERSION`. The workflow needs no
+secrets.
 
 See [COMPATIBILITY.md](COMPATIBILITY.md) for firmware and verification limits.
 See [RELEASE-PREPARATION.md](RELEASE-PREPARATION.md) for release decisions,

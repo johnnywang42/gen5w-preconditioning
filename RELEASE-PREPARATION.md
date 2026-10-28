@@ -3,8 +3,8 @@
 Status: source contribution for maintainer review; not a published binary release.
 The compatibility contribution is PR #2 and temperature/timeout follow-up is PR #3.
 The follow-up depends on the compatibility changes. Public app numbering remains
-1.2.0 / version code 3 in this branch; the maintainer selects the release version
-and a suitable version code before publishing. Personal ev6.* build numbers are
+1.2.0 in this branch; the maintainer selects the release version in `VERSION`
+before publishing (the version code follows from it). Personal ev6.* build numbers are
 not the proposed public release sequence.
 
 ## What owners can expect
@@ -43,14 +43,14 @@ BMS cutoff. See [the detailed evidence](TEMPERATURE-AND-TIMEOUT.md).
 1. Review the two contributions, including the shared Ioniq controller behavior.
 2. Clarify project licensing and the permitted distribution route. This branch
    does not add a license on behalf of the original author.
-3. Choose the release version (`versionName` in `app/build.gradle.kts` and
-   `version=` in `tune-service/NEMESIS.data`). There is no signing certificate
-   to choose: CI signs every build with a new throwaway key. The package writes
-   `/system/app/Launchpad.apk` directly rather than through `pm install`, so
-   releases don't need to share a certificate.
+3. Choose the release version and put it in `VERSION`; the app, the NEMESIS
+   package and the draft release all take it from there. There is no signing
+   certificate to choose: CI signs every build with a new throwaway key. The
+   package writes `/system/app/Launchpad.apk` directly rather than through
+   `pm install`, so releases don't need to share a certificate.
 4. Merge to `main`. CI builds and signs the APK, verifies it for API 19, builds
    the USB bundle from that exact APK, and attaches everything to the draft
-   release `v<versionName>` (see [BUILDING.md](BUILDING.md)).
+   release `v<VERSION>` (see [BUILDING.md](BUILDING.md)).
 5. Check a first installation, an update over a build signed with a different
    key that keeps app data, and removal from NEMESIS Manager, using the draft's
    artifacts. Stop and confirm Off before each change. Verify TUNE after reboot
