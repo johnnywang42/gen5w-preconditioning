@@ -278,6 +278,8 @@ these steps need ADB over Wi-Fi. in my testing, an iPhone hotspot is too modern 
 
 see [BUILDING.md](BUILDING.md). releases are built with `tools/build_apk.sh` and `tools/build_usb_bundles.py`.
 
+want to fix something or add your car? see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## credits
 
 - EV6 development, documentation, and vehicle testing: [Abro86](https://github.com/Abro86), with development, documentation, and host-test assistance from OpenAI Codex.
