@@ -79,7 +79,7 @@ The script runs tests/lint, builds, removes prior ZIP signature metadata, signs
 with the existing v1 SHA1/RSA procedure, aligns the APK, and verifies the
 signature for API 19. The final artifact is `dist/Launchpad.apk`.
 
-## NEMESIS package and USB install bundle
+## NEMESIS package and USB bundles
 
 ```sh
 python3 tools/build_usb_bundles.py            # uses dist/Launchpad.apk
@@ -101,7 +101,19 @@ Outputs in `dist/`:
   of `tune-service/scripts/common.sh`) against
   `packages/paytondev.launchpad.zip`.
 
-The USB ZIP also includes a plain-text `README.txt` (from
+- `Launchpad-port-kit-usb.zip`: the read-only vehicle porting kit. Its
+  `type=execute` `NEMESIS.data` runs `launchpad-port/collect.sh` (from
+  `usb/port-kit/`, with copies of `lib.sh` and `common.sh`). There is no
+  `packages/` folder, so it has nothing to install. It writes
+  `launchpad-port-report.txt` to the drive. The same signed APK is copied to
+  `/data/local/tmp/launchpad-port` only as the dex container for `PortProbe`,
+  run through `app_process`, and is removed afterwards with its dalvik-cache entry.
+  `PortProbe` makes no Binder call except `getInterfaceDescriptor()`, reads
+  transaction codes from the OEM framework classes by reflection, and listens to
+  key events passively. See
+  [COMPATIBILITY.md](COMPATIBILITY.md#car-not-listed-run-the-vehicle-porting-kit).
+
+The install USB ZIP also includes a plain-text `README.txt` (from
 `usb/README-template.txt`) with its log filename, installation steps and the
 known EV6 display limitation. The packaging test builds the bundle in a
 temporary directory using a synthetic APK; it checks the descriptor target,
@@ -150,8 +162,9 @@ EV6 US API 19 / 260507 identity, `knob.conf` selects
 exact NEEV US (Ioniq 5) API 19 / 260507 identity it selects
 `daudio_wp_daudioplus_neev_us`.
 
-Publish `Launchpad-install-usb.zip`, `paytondev.launchpad.zip` (for
-manual ADB installs) and `dist/Launchpad.apk` as GitHub release assets. These
+Publish `Launchpad-install-usb.zip`, `Launchpad-port-kit-usb.zip`,
+`paytondev.launchpad.zip` (for manual ADB installs) and `dist/Launchpad.apk`
+as GitHub release assets. These
 scripts generate local artifacts only and never connect to a car.
 
 ## Continuous integration

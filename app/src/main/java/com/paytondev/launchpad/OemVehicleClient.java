@@ -80,7 +80,7 @@ final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Comm
             if (reply.dataAvail() != 0) throw new IllegalStateException("Unexpected vehicle command reply");
         } finally { data.recycle(); reply.recycle(); }
     }
-    private static String hash(String path) throws Exception {
+    static String hash(String path) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (FileInputStream in = new FileInputStream(path)) {
             byte[] bytes = new byte[16384]; int count;

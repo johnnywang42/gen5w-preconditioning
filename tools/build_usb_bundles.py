@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build the NEMESIS package and the USB install bundle; never installs or connects to a car."""
+"""Build the NEMESIS package, the USB install bundle and the read-only vehicle porting
+kit bundle; never installs or connects to a car."""
 import argparse
 from pathlib import Path
 import shutil
@@ -84,7 +85,26 @@ def main():
         b"[nemesis]\nversion=1.0\ntype=execute\npath=launchpad/install.sh\n")
     out = dist / "Launchpad-install-usb.zip"
     pack(usb, out)
+
+    # The porting kit only reads: no package, so nothing for NEMESIS to install.
+    # The same signed APK goes along purely as PortProbe's dex container.
+    kit = stage / "port-kit"
+    kit_scripts = kit / "launchpad-port"
+    kit_scripts.mkdir(parents=True)
+    collect = (ROOT / "usb/port-kit/collect.sh").read_bytes().replace(b"\r\n", b"\n")
+    if collect.count(b"\nKIT_VERSION=@VERSION@\n") != 1:
+        raise SystemExit("usb/port-kit/collect.sh needs exactly one KIT_VERSION=@VERSION@ line")
+    (kit_scripts / "collect.sh").write_bytes(collect.replace(b"@VERSION@", version.encode("ascii")))
+    copy_lf(ROOT / "tune-service/scripts/common.sh", kit_scripts / "common.sh")
+    copy_lf(ROOT / "usb/launchpad/lib.sh", kit_scripts / "lib.sh")
+    shutil.copy2(apk, kit_scripts / "Launchpad.apk")
+    copy_lf(ROOT / "usb/port-kit/README-template.txt", kit / "README.txt")
+    (kit / "NEMESIS.data").write_bytes(
+        b"[nemesis]\nversion=1.0\ntype=execute\npath=launchpad-port/collect.sh\n")
+    kit_out = dist / "Launchpad-port-kit-usb.zip"
+    pack(kit, kit_out)
     print(out)
+    print(kit_out)
     print(package_zip)
 
 if __name__ == "__main__":
