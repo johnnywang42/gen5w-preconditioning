@@ -54,6 +54,20 @@ same items left unverified on the EV6 (driving activation, navigation
 interaction, active-session power loss, and a public release cycle) remain
 unverified here. No firmware, raw logs, or disassembly are included.
 
+**Battery temperature:** read-only USB captures on
+2026-10-28 found `com.hkmc.micom.cluster` / `com.hkmc.cluster.IClusterService`
+present, and this profile's `automotive.odex` declares the same cluster contract
+the EV6 reader uses: `addNavigationClusterListener` 37,
+`requestBatteryInfoReq()` 109, `removeNavigationClusterListener` 38, and
+listener `onHandleBatteryInfoResp(int[])` 16. The temperature display and warm
+advisory are therefore enabled for this exact profile. The interface does not
+define the array layout, so the EV6 decoding (eight values, index 1 as minimum
+pack temperature) was checked in the car: on 2026-10-28 the owner confirmed
+the Launchpad reading appeared and agreed with an OBD reader's temperature.
+Exact values were not recorded. On the same day, with the battery already
+warm, tapping Start showed the Battery warm notice. NEEV23 US remains without
+temperature reads.
+
 **Other model years:** other US-market Ioniq 5 vehicles reporting this exact
 device, software version, and both firmware fingerprints may also be
 compatible, but have not been tested beyond the verified **US 2022 Ioniq 5 SE AWD**.
@@ -104,7 +118,8 @@ been installed as a new vehicle build.
 No EV6 command/enum remapping was needed. Start/Stop command arguments, package
 IDs, release version, and original Ioniq TUNE default remain unchanged. The
 controller now adds a five-minute pending timeout for both profiles; native
-temperature reads and the warm advisory are restricted to the exact EV6 profile.
+temperature reads and the warm advisory are restricted to the exact EV6 and
+Ioniq 5 NEEV US profiles.
 No raw vehicle logs, firmware, disassembly, APKs, or signing material
 are included. This is evidence for the listed profile, not blanket EV6 support.
 

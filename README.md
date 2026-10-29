@@ -107,7 +107,7 @@ you only need the USB drive again to update.
 2. press **Start**. On the supported EV6, a warm reading may show a ten-second advisory with **Start anyway**. Otherwise Launchpad shows **Request sent** until the car confirms activation. A request without confirmed activation is cancelled after five minutes; Start returns only after the car reports Off.
 3. the battery management system can still say no, because of temperature, charge, or other conditions it controls.
 
-**a request does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active. The five-minute pending timeout does not cut short an active session. Temperature display and the warm advisory are EV6-only; the shared timeout also applies to the Ioniq 5 profile.
+**a request does not mean the battery heater is on.** Launchpad shows **Active** only when the car itself reports that conditioning is active. The five-minute pending timeout does not cut short an active session. Temperature display and the warm advisory run on the EV6 and the Ioniq 5 NEEV US head unit (both readings checked against OBD), not on NEEV23 US; the shared timeout applies to every profile.
 
 press **Stop** to cancel, including while it's still waiting. closing Launchpad does **not** stop a request that's already running.
 

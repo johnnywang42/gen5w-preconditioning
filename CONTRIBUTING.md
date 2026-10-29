@@ -46,6 +46,7 @@ run the tests from [BUILDING.md](BUILDING.md):
 ./gradlew :app:testDebugUnitTest :app:lintRelease :app:assembleDebug :app:assembleRelease
 python3 tools/test_ev6_scripts.py
 python3 tools/test_temperature_binder.py
+python3 tools/test_service_rebind.py
 python3 tools/test_usb_bundles.py
 ```
 
