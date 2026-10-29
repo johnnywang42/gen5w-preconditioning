@@ -39,8 +39,9 @@ final class OemVehicleClient implements VehiclePort, PreconditioningProfile.Comm
     }
     @Override public String unavailableReason() { return ""; }
     @Override public Integer readMinimumBatteryTemperatureC() {
-        // read() must have passed exact firmware hashes first. No Ioniq assumptions.
-        if (!firmwareChecked || !PreconditioningProfile.EV6_DEVICE.equals(Build.DEVICE)) return null;
+        // read() must have passed exact firmware hashes first; only profiles with a
+        // checked cluster contract may read.
+        if (!firmwareChecked || !PreconditioningProfile.supportsBatteryTemperature(Build.DEVICE)) return null;
         return Ev6BatteryTemperatureReader.read();
     }
     @Override public Reading read() throws Exception {

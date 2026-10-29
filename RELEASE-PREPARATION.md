@@ -28,9 +28,10 @@ BMS cutoff. See [the detailed evidence](TEMPERATURE-AND-TIMEOUT.md).
 - The five-minute pending timeout is covered by automated tests, not an in-car
   timeout observation. This is disclosed rather than requiring a manufactured
   failure before release preparation can proceed.
-- Temperature can remain stale after leaving and returning during an active
-  session. Reopening restored updates after the reported session ended. Do not
-  use the stale value to infer current temperature or heating status.
+- Builds before 1.3.1 can leave temperature stale after leaving and returning
+  during an active session; 1.3.1 fixes this (confirmed on the Ioniq 5 NEEV US
+  profile, not rechecked on the EV6). Do not use a stale value to infer current
+  temperature or heating status.
 - Only the stated US 2023 vehicle/profile has been tested. US 2022-2024 vehicles
   with matching hardware and exact firmware are possible candidates, untested.
 - Driving activation, native-navigation coexistence, active-session process or
