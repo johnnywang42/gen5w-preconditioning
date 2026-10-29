@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
-/** One-shot read using the separately validated EV6 cluster callback contract. */
+/** One-shot read using the cluster callback contract validated on EV6 and Ioniq 5 NEEV US. */
 final class Ev6BatteryTemperatureReader {
     private static final String SERVICE = "com.hkmc.cluster.IClusterService";
     private static final String LISTENER = "com.hkmc.cluster.INavigationClusterListener";

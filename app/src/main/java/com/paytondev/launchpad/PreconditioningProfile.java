@@ -31,6 +31,13 @@ final class PreconditioningProfile {
         return EV6_SOFTWARE.equals(software) && EV6_FRAMEWORK_SHA256.equals(frameworkHash)
             && EV6_SERVICE_SHA256.equals(serviceHash);
     }
+    // Native cluster battery read (37/109/38, callback 16). Ioniq 5 NEEV US 260507:
+    // automotive.odex captured on 2026-10-28 declares the same transaction numbers
+    // and signatures; on 2026-10-28 the displayed reading agreed with an OBD reader.
+    // NEEV23 US is excluded until its own read is checked in a car.
+    static boolean supportsBatteryTemperature(String device) {
+        return EV6_DEVICE.equals(device) || IONIQ5_NEEV_US_DEVICE.equals(device);
+    }
     static final long REFRESH_MS = 5000;
     interface Commands {
         void write(int transaction, int... values) throws Exception;
