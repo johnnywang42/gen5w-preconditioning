@@ -77,14 +77,17 @@ public final class PreconditioningService extends Service {
             publish();
         } });
     }
-    @Override public IBinder onBind(Intent intent) {
+    @Override public IBinder onBind(Intent intent) { attach(); return binder; }
+    // A session keeps the service alive after the activity unbinds. Android reuses
+    // the cached binder on return and calls only onRebind, so both paths attach.
+    @Override public void onRebind(Intent intent) { attach(); }
+    private void attach() {
         worker.post(new Runnable() { @Override public void run() {
             bound = true; worker.removeCallbacks(tick); tick.run();
             temperatureVisible = true; temperatureGeneration++;
             temperatureWorker.removeCallbacks(temperaturePoll);
             temperatureWorker.post(temperaturePoll);
         } });
-        return binder;
     }
     @Override public boolean onUnbind(Intent intent) {
         worker.post(new Runnable() { @Override public void run() {
@@ -93,7 +96,7 @@ public final class PreconditioningService extends Service {
             temperatureWorker.removeCallbacks(temperaturePoll);
             if (!snapshot.requested) { worker.removeCallbacks(tick); stopSelf(); }
         } });
-        return false;
+        return true; // Request onRebind when a client returns to the live service.
     }
     @Override public int onStartCommand(final Intent intent, int flags, int startId) {
         worker.post(new Runnable() { @Override public void run() {
